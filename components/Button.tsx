@@ -1,24 +1,22 @@
-import { forwardRef } from 'react';
-import { Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
+import { Pressable, Text } from "react-native";
 
-type ButtonProps = {
+interface ButtonProps {
   title: string;
-} & TouchableOpacityProps;
+  onPress: () => void;
+}
 
-export const Button = forwardRef<View, ButtonProps>(({ title, ...touchableProps }, ref) => {
+export default function Button({
+  title,
+  onPress,
+}: ButtonProps) {
   return (
-    <TouchableOpacity
-      ref={ref}
-      {...touchableProps}
-      className={`${styles.button} ${touchableProps.className}`}>
-      <Text className={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
+    <Pressable
+      onPress={onPress}
+      className="bg-indigo-600 p-4 rounded-xl mt-2 active:opacity-80"
+    >
+      <Text className="text-white text-center font-semibold text-lg">
+        {title}
+      </Text>
+    </Pressable>
   );
-});
-
-Button.displayName = 'Button';
-
-const styles = {
-  button: 'items-center bg-indigo-500 rounded-[28px] shadow-md p-4',
-  buttonText: 'text-white text-lg font-semibold text-center',
-};
+}
