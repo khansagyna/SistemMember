@@ -170,7 +170,7 @@ useEffect(() => {
 
               <Pressable
                 onPress={editing ? updatePromo : addPromo}
-                className="bg-indigo-600 p-4 rounded-2xl"
+                className="bg-[#213448] p-4 rounded-2xl"
               >
                 <Text className="text-white text-center font-semibold">
                   {editing ? "Update Promo" : "Simpan Promo"}
@@ -241,7 +241,7 @@ useEffect(() => {
                   setPercent(String(item.discount_percent));
                   setMinimum(String(item.minimum_amount));
                 }}
-                className="flex-1 bg-indigo-500 p-3 rounded-2xl"
+                className="flex-1 bg-[#213448] p-3 rounded-2xl"
               >
                 <Text className="text-white text-center font-semibold">Edit</Text>
               </Pressable>

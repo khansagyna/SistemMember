@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <LinearGradient
-      colors={["#4f46e5", "#1e293b"]}
+      colors={["#1C4D8D", "#1e293b"]}
       className="flex-1 justify-center px-6"
     >
       <KeyboardAvoidingView behavior="padding">
@@ -93,7 +93,7 @@ export default function Login() {
             onPress={handleLogin}
             disabled={loading}
             className={`mt-8 py-4 rounded-2xl items-center ${
-              loading ? "bg-gray-400" : "bg-indigo-600"
+              loading ? "bg-gray-400" : "bg-[#213448]"
             }`}
           >
             {loading ? (

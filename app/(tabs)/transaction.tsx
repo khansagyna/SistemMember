@@ -162,14 +162,14 @@ export default function TransactionScreen() {
       <View className="flex-row justify-between items-center mb-4">
         <View className="bg-white rounded-xl shadow-md p-3 flex-1 mr-2">
           <Text className="text-gray-500 text-sm">Total Pendapatan Bulan Ini</Text>
-          <Text className="text-indigo-600 font-bold text-lg">
+          <Text className="text-[#213448] font-bold text-lg">
             Rp {totalPendapatanBulanIni.toLocaleString()}
           </Text>
         </View>
 
         <TouchableOpacity
           onPress={generateMonthlyReport}
-          className="bg-indigo-600 px-4 py-3 rounded-xl shadow-md"
+          className="bg-[#213448] px-4 py-3 rounded-xl shadow-md"
         >
           <Text className="text-white font-semibold text-sm">Cetak Laporan</Text>
         </TouchableOpacity>
@@ -200,7 +200,7 @@ export default function TransactionScreen() {
               </View>
 
               <View className="items-end">
-                <Text className="text-indigo-600 font-bold text-lg">
+                <Text className="text-[#213448] font-bold text-lg">
                   Rp {(item.amount - item.discount).toLocaleString()}
                 </Text>
 
@@ -234,7 +234,7 @@ export default function TransactionScreen() {
             {/* ACTION BUTTONS */}
             <View className="flex-row gap-3 mt-4">
               <TouchableOpacity
-                className="flex-1 bg-indigo-600 p-3 rounded-xl items-center shadow-sm"
+                className="flex-1 bg-[#213448] p-3 rounded-xl items-center shadow-sm"
                 onPress={() => setSelected(item)}
               >
                 <Text className="text-white font-semibold">Edit</Text>
@@ -253,7 +253,7 @@ export default function TransactionScreen() {
 
       {/* FAB */}
       <TouchableOpacity
-        className="absolute bottom-12 right-5 w-16 h-16 bg-indigo-600 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-12 right-5 w-16 h-16 bg-[#213448] rounded-full items-center justify-center shadow-lg"
         onPress={() => setShowAdd(true)}
       >
         <Text className="text-white text-3xl font-bold">+</Text>

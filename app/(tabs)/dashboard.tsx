@@ -57,11 +57,11 @@ export default function Dashboard() {
     new Intl.NumberFormat("id-ID").format(num);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-100">
+    <SafeAreaView className="flex-1 bg-slate-100 ">
       {/* GRADIENT HEADER */}
       <LinearGradient
-        colors={["#4f46e5", "#1e293b"]}
-        className="px-6 pt-14 pb-12 rounded-b-[40px]"
+        colors={["#213448", "#1e293b"]}
+        className="px-6 pt-16 pb-20 rounded-b-[60px]"
       >
         <View className="flex-row justify-between items-center">
           <View>

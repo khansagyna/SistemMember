@@ -221,6 +221,6 @@ const styles = StyleSheet.create({
   statusRow: { marginTop: 15 },
   switchBox: { flexDirection: "row", alignItems: "center", marginTop: 6 },
   preview: { backgroundColor: "#eef2ff", padding: 15, borderRadius: 16, marginTop: 15 },
-  total: { fontSize: 20, fontWeight: "800", color: "#4f46e5" },
-  save: { backgroundColor: "#4f46e5", padding: 16, borderRadius: 20, alignItems: "center", marginTop: 20 },
+  total: { fontSize: 20, fontWeight: "800", color: "#213448" },
+  save: { backgroundColor: "#213448", padding: 16, borderRadius: 20, alignItems: "center", marginTop: 20 },
 });

@@ -69,7 +69,7 @@ export default function MemberPage() {
 
       {/* List */}
       {loading ? (
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#213448" />
       ) : members.length === 0 ? (
         <View className="flex-1 items-center justify-center mt-20">
           <Ionicons name="people-outline" size={60} color="#cbd5e1" />
@@ -97,7 +97,7 @@ export default function MemberPage() {
               <View className="flex-row mt-5 space-x-3">
                 <TouchableOpacity
                   onPress={() => setSelected(item)}
-                  className="flex-1 bg-indigo-600 py-3 rounded-xl items-center"
+                  className="flex-1 bg-[#213448] py-3 mr-3 rounded-xl items-center"
                 >
                   <Text className="text-white font-semibold">
                     Edit
@@ -121,9 +121,9 @@ export default function MemberPage() {
       {/* Floating Add Button */}
       <TouchableOpacity
         onPress={() => setShowAdd(true)}
-        className="absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-12 right-5 w-16 h-16 bg-[#213448] rounded-full items-center justify-center shadow-lg"
       >
-        <Ionicons name="add" size={28} color="white" />
+        <Text className="text-white text-3xl font-bold">+</Text>
       </TouchableOpacity>
 
       {showAdd && (
