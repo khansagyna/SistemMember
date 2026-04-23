@@ -1,113 +1,184 @@
+
 import {
   View,
   Text,
   KeyboardAvoidingView,
-  ActivityIndicator,
   TouchableOpacity,
-} from "react-native";
-import { useState } from "react";
-import { supabase } from "@/utils/supabase";
-import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import Input from "@/components/Input";
+  Platform,
+  TextInput
+} from 'react-native'
+
+import { useState } from 'react'
+import { router } from 'expo-router'
+import { supabase } from '@/utils/supabase'
+
+import {
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  Users
+} from 'lucide-react-native'
+
+import Input from '@/components/Input'
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
 
   const handleLogin = async () => {
-    if (!email || !password)
-      return alert("Isi email dan password");
 
-    setLoading(true);
+    setEmailError('')
+    setPasswordError('')
+
+    if (!email) {
+      setEmailError('Email wajib diisi')
+      return
+    }
+
+    if (!password) {
+      setPasswordError('Password wajib diisi')
+      return
+    }
+
+    setLoading(true)
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password,
-    });
+      password
+    })
 
-    setLoading(false);
+    setLoading(false)
 
-    if (error) return alert(error.message);
+    if (error) {
+      setEmailError('Login gagal')
+      return
+    }
 
-    router.replace("/(tabs)/dashboard");
-  };
+    router.replace('/(tabs)/dashboard')
+  }
 
   return (
-    <LinearGradient
-      colors={["#1C4D8D", "#1e293b"]}
-      className="flex-1 justify-center px-6"
-    >
-      <KeyboardAvoidingView behavior="padding">
-        
-        {/* GLASS CARD */}
-        <View className="bg-white/90 backdrop-blur-md rounded-[36px] p-8 shadow-2xl">
+    <View className='flex-1 bg-slate-50 justify-center px-6'>
 
-          {/* TITLE */}
-          <Text className="text-4xl font-bold text-gray-900 mb-2">
-            Sistem Member
-          </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
 
-          <Text className="text-gray-500 mb-10 text-base">
-            Kelola member dengan mudah & cepat
-          </Text>
+        <View className='bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm'>
 
-          {/* EMAIL */}
-          <Text className="text-gray-700 mb-2 font-medium">
-            Email
-          </Text>
+          <View className='items-center mb-8'>
 
-          <Input
-            placeholder="email@example.com"
-            value={email}
-            onChangeText={setEmail}
-          />
+            <View className='w-20 h-20 rounded-[28px] bg-indigo-600 items-center justify-center mb-5'>
+              <Users
+                size={34}
+                color='white'
+                strokeWidth={2.5}
+              />
+            </View>
 
-          {/* PASSWORD */}
-          <Text className="text-gray-700 mt-6 mb-2 font-medium">
-            Password
-          </Text>
+            <Text className='text-3xl font-interBold text-slate-900'>
+              Welcome Back
+            </Text>
 
-          <View className="relative">
-            <Input
-              placeholder="Masukkan password"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-            />
+            <Text className='text-slate-500 mt-3 text-center font-inter'>
+              Kelola transaksi, member dan promo
+              secara terpusat.
+            </Text>
 
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-4"
-            >
-              <Text className="text-gray-500 font-medium">
-                {showPassword ? "Hide" : "Show"}
-              </Text>
-            </TouchableOpacity>
           </View>
 
-          {/* BUTTON */}
+          <View className="mb-5">
+
+            <Text className="mb-2 font-interMedium text-slate-700">
+              Email
+            </Text>
+
+            <View className="bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center">
+
+              <Mail
+                size={18}
+                color="#64748b"
+              />
+
+              <TextInput
+                placeholder="email@example.com"
+                value={email}
+                onChangeText={setEmail}
+                className="ml-3 flex-1 font-inter"
+              />
+
+            </View>
+
+          </View>
+          <View className="mb-6">
+
+            <Text className="mb-2 font-interMedium text-slate-700">
+              Password
+            </Text>
+
+            <View className="bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center">
+
+              <Lock
+                size={18}
+                color="#64748b"
+              />
+
+              <TextInput
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                className="ml-3 flex-1 font-inter"
+              />
+
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+              >
+
+                {showPassword ? (
+                  <EyeOff size={18} color="#64748b" />
+                ) : (
+                  <Eye size={18} color="#64748b" />
+                )}
+
+              </TouchableOpacity>
+
+            </View>
+
+          </View>
+
           <TouchableOpacity
             onPress={handleLogin}
             disabled={loading}
-            className={`mt-8 py-4 rounded-2xl items-center ${
-              loading ? "bg-gray-400" : "bg-[#213448]"
-            }`}
+            className='bg-indigo-600 p-5 rounded-2xl'
           >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-semibold text-lg">
-                Login
-              </Text>
-            )}
+            <Text className='text-white text-center font-interBold text-base'>
+              {loading ? 'Loading...' : 'Masuk'}
+            </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity className='mt-5 items-center'>
+            <Text className='text-indigo-600 font-interMedium'>
+              Lupa password?
+            </Text>
+          </TouchableOpacity>
+
+          <View className='mt-8 items-center'>
+            <Text className='text-xs text-slate-400 font-inter'>
+              Sistem Member v1.0
+            </Text>
+          </View>
 
         </View>
 
       </KeyboardAvoidingView>
-    </LinearGradient>
-  );
+
+    </View>
+  )
 }

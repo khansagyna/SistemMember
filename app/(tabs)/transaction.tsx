@@ -1,282 +1,291 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Dimensions,
-} from "react-native";
-import { supabase } from "@/utils/supabase";
-import AddTransactionModal from "../transaction/AddTransactionModal";
-import EditTransactionModal from "../transaction/EditTransactionModal";
-import * as Print from "expo-print";
-import * as Sharing from "expo-sharing";
+    SafeAreaView,
+    View,
+    Text,
+    FlatList,
+    TouchableOpacity,
+    TextInput,
+    Alert
+} from 'react-native'
 
-const screenWidth = Dimensions.get("window").width;
-
-interface Transaction {
-  id: string;
-  name: string;
-  phone: string;
-  amount: number;
-  discount: number;
-  paid: boolean;
-  transaction_count: number;
-  created_at: string;
-}
+import { supabase } from '@/utils/supabase'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function TransactionScreen() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [selected, setSelected] = useState<Transaction | null>(null);
-  const [search, setSearch] = useState("");
 
-  const fetchData = async () => {
-    const { data } = await supabase
-      .from("transactions")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [transactions, setTransactions] = useState<any[]>([])
+    const [search, setSearch] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [filterPaid, setFilterPaid] = useState('all')
 
-    if (data) setTransactions(data as Transaction[]);
-  };
+    useEffect(() => {
+        loadData()
 
-  useEffect(() => {
-  let isMounted = true; // track mounting
+        const channel = supabase
+            .channel('trx-realtime')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'transactions' },
+                () => loadData()
+            )
+            .subscribe()
 
-  const loadData = async () => {
-    const { data } = await supabase
-      .from("transactions")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    if (isMounted && data) setTransactions(data as Transaction[]);
-  };
+        return () => {
+            supabase.removeChannel(channel)
+        }
 
-  loadData();
+    }, [])
 
-  const channel = supabase
-    .channel("realtime-transactions")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "transactions" },
-      () => {
-        if (isMounted) loadData();
-      }
-    )
-    .subscribe();
+    const loadData = async () => {
+        setLoading(true)
 
-  return () => {
-    isMounted = false; // mark unmounted
-    supabase.removeChannel(channel);
-  };
-}, []);
+        const { data } = await supabase
+            .from('transactions')
+            .select('*')
+            .order('created_at', { ascending: false })
 
-  const totalPendapatanBulanIni = transactions
-    .filter((t) => {
-      const d = new Date(t.created_at);
-      const now = new Date();
-      return (
-        d.getMonth() === now.getMonth() &&
-        d.getFullYear() === now.getFullYear() &&
-        t.paid
-      );
-    })
-    .reduce((sum, t) => sum + (t.amount - t.discount), 0);
-
-  const generateMonthlyReport = async () => {
-    try {
-      const now = new Date();
-      const month = now.getMonth();
-      const year = now.getFullYear();
-
-      const monthly = transactions.filter((t) => {
-        const d = new Date(t.created_at);
-        return d.getMonth() === month && d.getFullYear() === year && t.paid;
-      });
-
-      const total = monthly.reduce(
-        (sum, t) => sum + (t.amount - t.discount),
-        0
-      );
-
-      const rows = monthly
-        .map(
-          (t) => `
-        <tr>
-          <td>${t.name}</td>
-          <td>${t.phone}</td>
-          <td>Rp ${(t.amount - t.discount).toLocaleString()}</td>
-        </tr>
-      `
-        )
-        .join("");
-
-      const html = `
-        <h1>Laporan Bulanan ${month + 1}/${year}</h1>
-        <table border="1" cellpadding="8" cellspacing="0" width="100%">
-          <tr>
-            <th>Nama</th>
-            <th>Phone</th>
-            <th>Total</th>
-          </tr>
-          ${rows}
-        </table>
-        <h2>Total: Rp ${total.toLocaleString()}</h2>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri);
-      }
-    } catch (err) {
-      console.log(err);
+        setTransactions(data || [])
+        setLoading(false)
     }
-  };
 
-  const handleDelete = (id: string) => {
-    Alert.alert("Hapus Transaksi", "Apakah kamu yakin ingin menghapus?", [
-      { text: "Batal", style: "cancel" },
-      {
-        text: "Hapus",
-        style: "destructive",
-        onPress: async () => {
-          await supabase.from("transactions").delete().eq("id", id);
-        },
-      },
-    ]);
-  };
+    const filtered = transactions.filter(t => {
+        const searchMatch =
+            t.name.toLowerCase().includes(search.toLowerCase())
 
-  const filtered = transactions.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase())
-  );
+        if (filterPaid === 'paid')
+            return searchMatch && t.paid
 
-  return (
-    <View className="flex-1 bg-slate-100 px-4 pt-6">
-      {/* HEADER */}
-      <Text className="text-3xl font-bold mb-6 mt-10 text-gray-800 ">Transaksi</Text>
+        if (filterPaid === 'unpaid')
+            return searchMatch && !t.paid
 
-      {/* TOTAL & CETAK LAPORAN */}
-      <View className="flex-row justify-between items-center mb-4">
-        <View className="bg-white rounded-xl shadow-md p-3 flex-1 mr-2">
-          <Text className="text-gray-500 text-sm">Total Pendapatan Bulan Ini</Text>
-          <Text className="text-[#213448] font-bold text-lg">
-            Rp {totalPendapatanBulanIni.toLocaleString()}
-          </Text>
-        </View>
+        return searchMatch
+    })
 
-        <TouchableOpacity
-          onPress={generateMonthlyReport}
-          className="bg-[#213448] px-4 py-3 rounded-xl shadow-md"
-        >
-          <Text className="text-white font-semibold text-sm">Cetak Laporan</Text>
-        </TouchableOpacity>
-      </View>
+    const paidCount = transactions.filter(x => x.paid).length
+    const unpaidCount = transactions.filter(x => !x.paid).length
 
-      {/* SEARCH */}
-      <TextInput
-        placeholder="Cari customer..."
-        value={search}
-        onChangeText={setSearch}
-        className="bg-white p-3 rounded-xl mb-4 shadow-sm"
-      />
+    const revenue = transactions
+        .filter(x => x.paid)
+        .reduce(
+            (a, x) => a + ((x.amount || 0) - (x.discount || 0)), 0
+        )
 
-      {/* LIST TRANSAKSI */}
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 150 }}
-        renderItem={({ item }) => (
-          <View className="bg-white p-5 rounded-2xl mb-4 shadow-md">
-            <View className="flex-row justify-between">
-              <View>
-                <Text className="font-bold text-lg text-gray-800">{item.name}</Text>
-                <Text className="text-gray-500 mt-1">{item.phone}</Text>
-                <Text className="text-gray-400 mt-1 text-sm">
-                  {new Date(item.created_at).toLocaleDateString()} - Transaksi ke {item.transaction_count}
-                </Text>
-              </View>
+    const handleDelete = (id: string) => {
+        Alert.alert(
+            'Hapus',
+            'Yakin hapus transaksi?',
+            [
+                { text: 'Batal' },
+                {
+                    text: 'Hapus',
+                    style: 'destructive',
+                    onPress: async () => {
+                        await supabase
+                            .from('transactions')
+                            .delete()
+                            .eq('id', id)
+                    }
+                }
+            ]
+        )
+    }
 
-              <View className="items-end">
-                <Text className="text-[#213448] font-bold text-lg">
-                  Rp {(item.amount - item.discount).toLocaleString()}
+    const formatRupiah = (n: number) =>
+        new Intl.NumberFormat('id-ID').format(n)
+
+    const Header = () => (
+        <View>
+
+            <View className='bg-white px-6 pt-12 pb-6 rounded-b-[36px] shadow-sm'>
+
+                <Text className='text-3xl font-interBold text-slate-900'>
+                    Transaksi
                 </Text>
 
-                <View
-                  className={`mt-2 px-3 py-1 rounded-full ${
-                    item.paid ? "bg-green-100" : "bg-red-100"
-                  }`}
-                >
-                  <Text
-                    className={`font-semibold ${
-                      item.paid ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {item.paid ? "Paid" : "Unpaid"}
-                  </Text>
+                <Text className='text-slate-500 font-inter mt-1'>
+                    Kelola semua transaksi customer
+                </Text>
+
+                <View className='bg-white rounded-2xl px-4 py-3 mt-5 border border-slate-200 flex-row items-center'>
+                    <Ionicons name='search' size={18} />
+                    <TextInput
+                        placeholder='Cari customer...'
+                        value={search}
+                        onChangeText={setSearch}
+                        className='ml-3 flex-1 font-inter'
+                    />
                 </View>
-              </View>
+
+                <View className='flex-row gap-3 mt-4'>
+
+                    {['all', 'paid', 'unpaid'].map((f) => (
+                        <TouchableOpacity
+                            key={f}
+                            onPress={() => setFilterPaid(f)}
+                            className={`px-4 py-2 rounded-full ${filterPaid === f
+                                    ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+                            <Text
+                                className={filterPaid === f
+                                    ? 'text-white font-inter' : 'text-slate-700 font-inter'}>
+                                {f}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+
+                </View>
+
             </View>
 
-            {item.discount > 0 && (
-              <View className="bg-green-50 p-3 rounded-lg mt-3">
-                <Text className="font-bold text-green-600">🎉 Promo Diskon!</Text>
-                <Text>Harga Awal: Rp {item.amount.toLocaleString()}</Text>
-                <Text>Diskon: Rp {item.discount.toLocaleString()}</Text>
-                <Text>
-                  Setelah Diskon: Rp {(item.amount - item.discount).toLocaleString()}
+            <View className='px-5 mt-5'>
+
+                <View className='bg-white rounded-3xl p-5 border border-slate-100 shadow-sm'>
+
+                    <View className='flex-row justify-between'>
+
+                        <View>
+                            <Text className='text-slate-500 text-sm font-inter'>
+                                Revenue
+                            </Text>
+                            <Text className='text-xl font-interBold mt-2'>
+                                Rp {formatRupiah(revenue)}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Text className='text-slate-500 font-inter text-sm'>Paid</Text>
+                            <Text className='text-xl font-interBold mt-2'>
+                                {paidCount}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Text className='text-slate-500 font-inter text-sm'>Unpaid</Text>
+                            <Text className='text-xl font-interBold mt-2'>
+                                {unpaidCount}
+                            </Text>
+                        </View>
+
+                    </View>
+
+                </View>
+
+                <Text className='text-xl font-interBold mt-8 mb-4'>
+                    Daftar Transaksi
                 </Text>
-              </View>
-            )}
 
-            {/* ACTION BUTTONS */}
-            <View className="flex-row gap-3 mt-4">
-              <TouchableOpacity
-                className="flex-1 bg-[#213448] p-3 rounded-xl items-center shadow-sm"
-                onPress={() => setSelected(item)}
-              >
-                <Text className="text-white font-semibold">Edit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="flex-1 bg-red-500 p-3 rounded-xl items-center shadow-sm"
-                onPress={() => handleDelete(item.id)}
-              >
-                <Text className="text-white font-semibold">Delete</Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        )}
-      />
 
-      {/* FAB */}
-      <TouchableOpacity
-        className="absolute bottom-12 right-5 w-16 h-16 bg-[#213448] rounded-full items-center justify-center shadow-lg"
-        onPress={() => setShowAdd(true)}
-      >
-        <Text className="text-white text-3xl font-bold">+</Text>
-      </TouchableOpacity>
+        </View>
+    )
 
-      {showAdd && (
-        <AddTransactionModal
-          onClose={(newDataAdded?: boolean) => {
-            setShowAdd(false);
-            if (newDataAdded) fetchData();
-          }}
-        />
-      )}
+    return (
+        <SafeAreaView className='flex-1 bg-slate-100'>
 
-      {selected && (
-        <EditTransactionModal
-          data={selected}
-          onClose={(updated?: boolean) => {
-            setSelected(null);
-            if (updated) fetchData();
-          }}
-        />
-      )}
-    </View>
-  );
+            <FlatList
+                data={filtered}
+                keyExtractor={(item) => item.id}
+                ListHeaderComponent={<Header />}
+                contentContainerStyle={{ paddingBottom: 120 }}
+                renderItem={({ item }) => (
+
+                    <View className='px-5'>
+
+                        <View className='bg-white rounded-3xl p-5 mb-3 border border-slate-100 shadow-sm'>
+
+                            <View className='flex-row justify-between'>
+
+                                <View className='flex-row items-center gap-3 flex-1'>
+
+                                    <View className='w-12 h-12 rounded-full bg-indigo-100 items-center justify-center'>
+                                        <Text className='font-interBold text-indigo-700'>
+                                            {item.name?.slice(0, 2)?.toUpperCase()}
+                                        </Text>
+                                    </View>
+
+                                    <View>
+                                        <Text className='font-interBold text-base'>
+                                            {item.name}
+                                        </Text>
+
+                                        <Text className='text-slate-500 font-inter text-sm'>
+                                            {item.phone}
+                                        </Text>
+
+                                        <Text className='text-slate-400 font-inter text-xs mt-1'>
+                                            {new Date(item.created_at).toLocaleDateString('id-ID')}
+                                        </Text>
+
+                                        {item.discount > 0 && (
+                                            <View className='mt-2 bg-amber-100 px-3 py-1  rounded-full self-start'>
+                                                <Text className='text-amber-700 text-xs font-interBold'>
+                                                    Diskon
+                                                </Text>
+                                            </View>
+                                        )}
+
+                                    </View>
+
+                                </View>
+
+                                <View className='items-end'>
+
+                                    <Text className='font-interBold text-lg'>
+                                        Rp {formatRupiah(
+                                            (item.amount || 0) - (item.discount || 0)
+                                        )}
+                                    </Text>
+
+                                    <View className={`
+mt-2 px-3 py-1 rounded-full
+${item.paid ? 'bg-emerald-100' : 'bg-rose-100'}
+`}>
+                                        <Text className={item.paid ?
+                                            'text-emerald-700 font-inter' : 'text-rose-700 font-inter'}>
+                                            {item.paid ? 'Paid' : 'Unpaid'}
+                                        </Text>
+                                    </View>
+
+                                    <View className='flex-row gap-3 mt-4'>
+
+                                        <TouchableOpacity>
+                                            <Ionicons
+                                                name='pencil-outline'
+                                                size={20}
+                                                color='#2563eb'
+                                            />
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() => handleDelete(item.id)}
+                                        >
+                                            <Ionicons
+                                                name='trash-outline'
+                                                size={20}
+                                                color='#dc2626'
+                                            />
+                                        </TouchableOpacity>
+
+                                    </View>
+
+                                </View>
+
+                            </View>
+
+                        </View>
+
+                    </View>
+
+                )}
+            />
+
+            <TouchableOpacity
+                className='absolute bottom-8 right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg'
+            >
+                <Ionicons name='add' size={32} color='white' />
+            </TouchableOpacity>
+
+        </SafeAreaView>
+    )
 }
+

@@ -3,14 +3,16 @@ import {
   View,
   Text,
   Modal,
-  TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
 import { supabase } from "@/utils/supabase";
 import { Member } from "./types";
 
@@ -26,10 +28,21 @@ export default function EditMemberModal({
   const [name, setName] = useState(data.name);
   const [phone, setPhone] = useState(data.phone);
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const handleUpdate = async () => {
-    if (!name || !phone)
-      return Alert.alert("Error", "Semua field wajib diisi");
+    setNameError("");
+    setPhoneError("");
+
+    if (!name) {
+      setNameError("Nama wajib diisi");
+      return;
+    }
+    if (!phone) {
+      setPhoneError("No HP wajib diisi");
+      return;
+    }
 
     setLoading(true);
 
@@ -53,84 +66,85 @@ export default function EditMemberModal({
     <Modal transparent animationType="slide">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.overlay}
+        className="flex-1 bg-black/40 justify-end"
       >
-        <View style={styles.modal}>
-          <Text style={styles.title}>Edit Member</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Nama"
-            value={name}
-            onChangeText={setName}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="No HP"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
-
-          <TouchableOpacity
-            style={styles.save}
-            onPress={handleUpdate}
-            disabled={loading}
+        <ScrollView
+          className="bg-white rounded-t-4xl"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          {/* HEADER */}
+          <LinearGradient
+            colors={["#1e3a8a", "#3b82f6"]}
+            className="rounded-t-4xl px-6 py-6"
           >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.saveText}>Update</Text>
-            )}
-          </TouchableOpacity>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
+                  <Ionicons name="pencil" size={24} color="white" />
+                </View>
+                <Text className="text-white text-2xl font-bold ml-3">
+                  Edit Member
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={onClose}
+                className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
+              >
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
 
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.cancel}>Batal</Text>
-          </TouchableOpacity>
-        </View>
+          {/* FORM */}
+          <View className="px-6 py-6 flex-1">
+            <Input
+              label="Nama Member"
+              placeholder="Masukkan nama"
+              value={name}
+              onChangeText={(text) => {
+                setName(text);
+                setNameError("");
+              }}
+              icon="person-outline"
+              error={nameError}
+            />
+
+            <Input
+              label="No HP"
+              placeholder="Contoh: 081234567890"
+              value={phone}
+              onChangeText={(text) => {
+                setPhone(text);
+                setPhoneError("");
+              }}
+              keyboardType="phone-pad"
+              icon="call-outline"
+              error={phoneError}
+            />
+
+            <View className="flex-1" />
+
+            <View className="flex-row gap-3 mb-4">
+              <Button
+                title="Batal"
+                onPress={onClose}
+                variant="outline"
+                size="lg"
+                fullWidth
+              />
+
+              <Button
+                title="Update"
+                onPress={handleUpdate}
+                loading={loading}
+                disabled={loading}
+                size="lg"
+                fullWidth
+              />
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "flex-end",
-  },
-  modal: {
-    backgroundColor: "#fff",
-    padding: 25,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "800",
-    marginBottom: 15,
-  },
-  input: {
-    backgroundColor: "#f3f4f6",
-    borderRadius: 16,
-    padding: 15,
-    marginTop: 10,
-  },
-  save: {
-    backgroundColor: "#213448",
-    padding: 16,
-    borderRadius: 20,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveText: {
-    color: "white",
-    fontWeight: "700",
-  },
-  cancel: {
-    textAlign: "center",
-    marginTop: 15,
-    color: "#6b7280",
-  },
-});
