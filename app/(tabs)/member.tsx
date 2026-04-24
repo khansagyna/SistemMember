@@ -3,8 +3,8 @@ import { SafeAreaView, FlatList, ActivityIndicator, Alert } from 'react-native'
 
 import { useMembers } from '../hooks/useMember'
 import { deleteMember } from '../api/member/promoApi'
-import MemberCard from '@/components/member/MemberCard'
-import MemberHeader from '@/components/member/MemberHeader'
+import MemberCard from '@/src/features/members/components/MemberCard'
+import MemberHeader from '@/src/features/members/components/MemberHeader'
 
 export default function MemberPage() {
   const { members, loading } = useMembers()

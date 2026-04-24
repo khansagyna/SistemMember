@@ -9,7 +9,7 @@ import {
     Alert
 } from 'react-native'
 
-import { supabase } from '@/utils/supabase'
+import { supabase } from '@/lib/supabase'
 import { Ionicons } from '@expo/vector-icons'
 
 export default function TransactionScreen() {
@@ -124,7 +124,7 @@ export default function TransactionScreen() {
                             key={f}
                             onPress={() => setFilterPaid(f)}
                             className={`px-4 py-2 rounded-full ${filterPaid === f
-                                    ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+                                ? 'bg-indigo-600' : 'bg-slate-200'}`}>
                             <Text
                                 className={filterPaid === f
                                     ? 'text-white font-inter' : 'text-slate-700 font-inter'}>

@@ -12,7 +12,7 @@ import {
   FlatList,
   Switch,
 } from "react-native";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "@/lib/supabase";
 
 interface Props {
   onClose: (newDataAdded?: boolean) => void; // tipe boolean opsional

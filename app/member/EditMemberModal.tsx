@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
-import { supabase } from "@/utils/supabase";
+import Input from "@/src/shared/components/Input";
+import Button from "@/src/shared/components/Button";
+import { supabase } from "@/lib/supabase";
 import { Member } from "./types";
 
 interface Props {

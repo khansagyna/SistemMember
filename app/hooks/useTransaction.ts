@@ -1,13 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "@/lib/supabase";
 import { transactionApi } from "../api/transaction/transactionApi";
+import { Transaction } from "@";
 
 export function useTransactions() {
 
-    const [transactions, setTransactions] = useState([]);
     const [search, setSearch] = useState("");
     const [filterPaid, setFilterPaid] = useState("all");
     const [loading, setLoading] = useState(true);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+
 
     const loadData = async () => {
 

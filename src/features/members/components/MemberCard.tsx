@@ -1,7 +1,13 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
-export default function MemberCard({ item, onDelete }) {
+type MemberCardProps = {
+  item: any
+  onDelete: (id: string) => void
+}
+
+
+export default function MemberCard({ item, onDelete }: MemberCardProps) {
   return (
     <View className='px-5'>
       <View className='bg-white rounded-3xl p-5 mb-3'>

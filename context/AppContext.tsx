@@ -1,5 +1,5 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { supabase } from "utils/supabase";
+import { supabase } from "@/lib/supabase";
 
 export interface Member {
   id: string;

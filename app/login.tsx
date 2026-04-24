@@ -10,7 +10,7 @@ import {
 
 import { useState } from 'react'
 import { router } from 'expo-router'
-import { supabase } from '@/utils/supabase'
+import { supabase } from '@/lib/supabase'
 
 import {
   Lock,
@@ -20,7 +20,7 @@ import {
   Users
 } from 'lucide-react-native'
 
-import Input from '@/components/Input'
+import Input from '@/src/shared/components/Input'
 
 export default function Login() {
 

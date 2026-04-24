@@ -2,7 +2,7 @@ import "../global.css";
 
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
 
 import {

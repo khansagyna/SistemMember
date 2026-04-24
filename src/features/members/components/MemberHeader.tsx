@@ -1,10 +1,16 @@
 import { View, Text, TextInput } from 'react-native'
 
+type MemberHeaderProps = {
+  members: any[]
+  search: string
+  setSearch: (value: string) => void
+}
+
 export default function MemberHeader({
   members,
   search,
   setSearch
-}) {
+}: MemberHeaderProps) {
 
   const newMembersMonth = members.filter(m => {
     const d = new Date(m.created_at)
