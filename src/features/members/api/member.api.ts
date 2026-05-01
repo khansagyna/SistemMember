@@ -29,6 +29,14 @@ export const memberApi = {
       .eq('id', id)
 
     if (error) throw error
+  },
+
+  create: async (data: { name: string; phone: string }) => {
+    const { error } = await supabase
+      .from('members')
+      .insert(data)
+
+    if (error) throw error
   }
 
 }

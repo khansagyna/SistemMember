@@ -6,7 +6,7 @@ import { Transaction } from "@";
 export function useTransactions() {
 
     const [search, setSearch] = useState("");
-    const [filterPaid, setFilterPaid] = useState("all");
+    const [filterPaid, setFilterPaid] = useState<"all" | "paid" | "unpaid">("all");
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
 

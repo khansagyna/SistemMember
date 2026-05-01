@@ -24,12 +24,17 @@ import Button from '@/shared/components/Button'
 import { Member } from '@/features/members/types'
 import Toast from '@/shared/components/Toast'
 import { useToast } from '@/shared/hooks/useToast'
+import AddMemberModal from './components/AddMemberModal'
+import EditMemberModal from './components/EditMemberModal'
 
 export default function MemberScreen() {
 
   const { members, loading, reload } = useMembers()
   const [search, setSearch] = useState('')
   const { toast, showToast, hideToast } = useToast()
+
+  // Add Member state
+  const [showAddModal, setShowAddModal] = useState(false)
 
   // Delete state
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -38,11 +43,6 @@ export default function MemberScreen() {
 
   // Edit state
   const [editingMember, setEditingMember] = useState<Member | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editPhone, setEditPhone] = useState('')
-  const [editNameError, setEditNameError] = useState('')
-  const [editPhoneError, setEditPhoneError] = useState('')
-  const [updating, setUpdating] = useState(false)
 
   const handleDeletePress = (id: string) => {
     setDeleteId(id)
@@ -66,48 +66,6 @@ export default function MemberScreen() {
 
   const handleEditPress = (item: Member) => {
     setEditingMember(item)
-    setEditName(item.name)
-    setEditPhone(item.phone)
-    setEditNameError('')
-    setEditPhoneError('')
-  }
-
-  const handleEditClose = () => {
-    setEditingMember(null)
-    setEditName('')
-    setEditPhone('')
-    setEditNameError('')
-    setEditPhoneError('')
-  }
-
-  const handleEditSave = async () => {
-    setEditNameError('')
-    setEditPhoneError('')
-
-    if (!editName) {
-      setEditNameError('Nama wajib diisi')
-      return
-    }
-    if (!editPhone) {
-      setEditPhoneError('No HP wajib diisi')
-      return
-    }
-    if (!editingMember) return
-
-    setUpdating(true)
-    try {
-      await memberApi.update(editingMember.id, {
-        name: editName,
-        phone: editPhone,
-      })
-      reload()
-      handleEditClose()
-      showToast('success', 'Member berhasil diupdate')
-    } catch (e) {
-      showToast('error', 'Gagal mengupdate member')
-      setEditNameError('Gagal mengupdate member')
-    }
-    setUpdating(false)
   }
 
   const filtered = members.filter(m =>
@@ -177,94 +135,35 @@ export default function MemberScreen() {
       />
 
       {/* Edit Member Modal */}
-      {editingMember && (
-        <Modal transparent animationType="slide">
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            className="flex-1 bg-black/40 justify-end"
-          >
-            <ScrollView
-              className="bg-white rounded-t-4xl"
-              contentContainerStyle={{ flexGrow: 1 }}
-            >
-              {/* HEADER */}
-              <LinearGradient
-                colors={['#1e3a8a', '#3b82f6']}
-                className="rounded-t-4xl px-6 py-6"
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center">
-                    <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
-                      <Ionicons name="pencil" size={24} color="white" />
-                    </View>
-                    <Text className="text-white text-2xl font-bold ml-3">
-                      Edit Member
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={handleEditClose}
-                    className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
-                  >
-                    <Ionicons name="close" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </LinearGradient>
-
-              {/* FORM */}
-              <View className="px-6 py-6 flex-1">
-                <Input
-                  label="Nama Member"
-                  placeholder="Masukkan nama"
-                  value={editName}
-                  onChangeText={(text) => {
-                    setEditName(text)
-                    setEditNameError('')
-                  }}
-                  icon="person-outline"
-                  error={editNameError}
-                />
-
-                <Input
-                  label="No HP"
-                  placeholder="Contoh: 081234567890"
-                  value={editPhone}
-                  onChangeText={(text) => {
-                    setEditPhone(text)
-                    setEditPhoneError('')
-                  }}
-                  keyboardType="phone-pad"
-                  icon="call-outline"
-                  error={editPhoneError}
-                />
-
-                <View className="flex-1" />
-
-                <View className="flex-row gap-3 mb-4">
-                  <Button
-                    title="Batal"
-                    onPress={handleEditClose}
-                    variant="outline"
-                    size="lg"
-                    fullWidth
-                  />
-
-                  <Button
-                    title="Update"
-                    onPress={handleEditSave}
-                    loading={updating}
-                    disabled={updating}
-                    size="lg"
-                    fullWidth
-                  />
-                </View>
-              </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </Modal>
-      )}
+      <EditMemberModal
+        visible={!!editingMember}
+        member={editingMember}
+        onClose={(updated) => {
+          setEditingMember(null)
+          if (updated) reload()
+        }}
+      />
 
       {/* Toast */}
       <Toast visible={toast.visible} type={toast.type} message={toast.message} onHide={hideToast} />
+
+      {/* FAB ADD MEMBER */}
+      <TouchableOpacity
+        onPress={() => setShowAddModal(true)}
+        className="absolute bottom-[110px] right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg elevation-5"
+        style={{ zIndex: 9999 }}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
+
+      {/* Add Member Modal */}
+      <AddMemberModal
+        visible={showAddModal}
+        onClose={(added) => {
+          setShowAddModal(false)
+          if (added) reload()
+        }}
+      />
     </SafeAreaView>
   )
 }

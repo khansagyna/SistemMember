@@ -77,6 +77,7 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
             <View style={{ flex: 1 }}>
 
               <ScrollView
+                style={{ flex: 1 }}
                 className="px-6"
                 contentContainerStyle={{ paddingBottom: 20 }}
               >

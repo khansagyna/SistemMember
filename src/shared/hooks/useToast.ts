@@ -1,27 +1,14 @@
-import { useState, useCallback } from 'react'
-
-type ToastType = 'success' | 'error'
-
-interface ToastState {
-  visible: boolean
-  type: ToastType
-  message: string
-}
+import { useGlobalToast } from '../context/ToastContext'
 
 export function useToast() {
-  const [toast, setToast] = useState<ToastState>({
-    visible: false,
-    type: 'success',
-    message: '',
-  })
-
-  const showToast = useCallback((type: ToastType, message: string) => {
-    setToast({ visible: true, type, message })
-  }, [])
-
-  const hideToast = useCallback(() => {
-    setToast(prev => ({ ...prev, visible: false }))
-  }, [])
-
-  return { toast, showToast, hideToast }
+  const { showToast } = useGlobalToast()
+  
+  // Kita biarkan return-nya mirip agar tidak merusak kode yang sudah ada,
+  // tapi sekarang fungsinya sudah tembus ke Global.
+  return { 
+    showToast,
+    // Dummy state untuk mencegah error di komponen yang masih destructuring toast
+    toast: { visible: false, type: 'success', message: '' },
+    hideToast: () => {} 
+  }
 }

@@ -23,11 +23,11 @@ export default function Button({
   fullWidth = true,
 }: ButtonProps) {
   const variantStyles = {
-    primary: "bg-gradient-to-r from-blue-600 to-blue-700 active:opacity-90",
-    secondary: "bg-gradient-to-r from-slate-200 to-slate-300 active:opacity-90",
-    danger: "bg-gradient-to-r from-red-500 to-red-600 active:opacity-90",
-    success: "bg-gradient-to-r from-green-500 to-green-600 active:opacity-90",
-    outline: "border-2 border-blue-600 active:opacity-75",
+    primary: "bg-indigo-600 active:bg-indigo-700",
+    secondary: "bg-slate-200 active:bg-slate-300",
+    danger: "bg-red-500 active:bg-red-600",
+    success: "bg-green-500 active:bg-green-600",
+    outline: "border-2 border-indigo-600 active:bg-indigo-50",
   };
 
   const sizeStyles = {
@@ -36,7 +36,7 @@ export default function Button({
     lg: "px-8 py-4",
   };
 
-  const textColorStyle = variant === "outline" ? "text-blue-600" : "text-white";
+  const textColorStyle = variant === "outline" ? "text-indigo-600" : "text-white";
   const textSizeStyle = {
     sm: "text-sm",
     md: "text-base",
@@ -56,14 +56,14 @@ export default function Button({
       `}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "outline" ? "#2563eb" : "white"} />
+        <ActivityIndicator color={variant === "outline" ? "#4f46e5" : "white"} />
       ) : (
         <>
           {icon && (
             <Ionicons
               name={icon}
               size={size === "sm" ? 16 : size === "md" ? 18 : 20}
-              color={variant === "outline" ? "#2563eb" : "white"}
+              color={variant === "outline" ? "#4f46e5" : "white"}
             />
           )}
           <Text

@@ -20,6 +20,7 @@ import {
 } from "@expo-google-fonts/inter";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { ToastProvider } from "@/shared/context/ToastContext";
 
 // Apply default font family globally
 // @ts-ignore
@@ -79,13 +80,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView  style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          {session ? (
-            <Stack.Screen name="(tabs)" />
-          ) : (
-            <Stack.Screen name="login" />
-          )}
-        </Stack>
+        <ToastProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            {session ? (
+              <Stack.Screen name="(tabs)" />
+            ) : (
+              <Stack.Screen name="login" />
+            )}
+          </Stack>
+        </ToastProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );

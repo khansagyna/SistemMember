@@ -4,7 +4,9 @@ import { Transaction } from '@/features/types/types'
 
 export function useDashboard() {
 
-    const [transactions, setTransactions] = useState<Transaction[]>([])
+    const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([])
+    const [allTransactions, setAllTransactions] = useState<any[]>([])
+    const [todayTransactions, setTodayTransactions] = useState<Transaction[]>([])
     const [members, setMembers] = useState(0)
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
@@ -12,12 +14,16 @@ export function useDashboard() {
     const load = async () => {
         setLoading(true)
 
-        const [trx, mem] = await Promise.all([
-            dashboardApi.getTransactions(),
+        const [recent, all, today, mem] = await Promise.all([
+            dashboardApi.getRecentTransactions(),
+            dashboardApi.getAllTransactions(),
+            dashboardApi.getTodayTransactions(),
             dashboardApi.getMembersCount()
         ])
 
-        setTransactions(trx)
+        setRecentTransactions(recent)
+        setAllTransactions(all)
+        setTodayTransactions(today)
         setMembers(mem)
         setLoading(false)
     }
@@ -33,46 +39,44 @@ export function useDashboard() {
     }, [])
 
     const stats = useMemo(() => {
-        const today = new Date().toDateString()
-        const thisMonth = new Date().getMonth()
-        const thisYear = new Date().getFullYear()
+        const now = new Date();
+        const thisMonth = now.getMonth();
+        const thisYear = now.getFullYear();
 
-        const todayTrx = transactions.filter(
-            t => new Date(t.created_at).toDateString() === today
-        )
-
-        const omzet = todayTrx.reduce(
+        // Akurat Hari Ini
+        const omzet = todayTransactions.reduce(
             (a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0
         )
 
-        const omzetBulanIni = transactions
+        // Akurat Bulan Ini (dari allTransactions)
+        const omzetBulanIni = allTransactions
             .filter(t => {
                 const d = new Date(t.created_at)
                 return d.getMonth() === thisMonth && d.getFullYear() === thisYear
             })
             .reduce((a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0)
 
-        const totalOmzet = transactions.reduce(
+        // Akurat Total (dari allTransactions)
+        const totalOmzet = allTransactions.reduce(
             (a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0
         )
 
-        const unpaid = transactions
+        // Akurat Piutang (dari allTransactions)
+        const unpaidAmount = allTransactions
             .filter(t => !t.paid)
-            .reduce(
-                (a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0
-            )
+            .reduce((a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0)
 
         return {
-            trxToday: todayTrx.length,
+            trxToday: todayTransactions.length,
             omzet,
             omzetBulanIni,
             totalOmzet,
-            unpaid
+            unpaid: unpaidAmount
         }
-    }, [transactions])
+    }, [todayTransactions, allTransactions])
 
     return {
-        transactions,
+        transactions: recentTransactions,
         members,
         loading,
         refreshing,

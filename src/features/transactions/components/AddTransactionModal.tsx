@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Platform,
   ScrollView,
   Switch,
+  SafeAreaView
 } from "react-native";
-import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
-import { useToast } from "@/shared/hooks/useToast";
+import { useAddTransaction } from "../hooks/useAddTransaction";
 
 interface Props {
   visible: boolean;
@@ -22,268 +22,152 @@ interface Props {
 }
 
 export default function AddTransactionModal({ visible, onClose }: Props) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [amount, setAmount] = useState("");
-  const [paid, setPaid] = useState(true);
+  const {
+    name, setName,
+    phone, setPhone,
+    amount, setAmount,
+    paid, setPaid,
+    searchMember, setSearchMember,
+    filteredMembers,
+    handleSelectMember,
+    autoDiscount,
+    activePromo,
+    loading,
+    handleSave,
+  } = useAddTransaction(() => onClose(true));
 
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [activePromo, setActivePromo] = useState<any>(null);
-  const [transactionCount, setTransactionCount] = useState(0);
-  const [autoDiscount, setAutoDiscount] = useState(0);
-  const [saving, setSaving] = useState(false);
-  const { showToast } = useToast();
-
-  useEffect(() => {
-    if (visible) {
-      setName(""); setPhone(""); setAmount(""); setPaid(true);
-      setSuggestions([]); setAutoDiscount(0); setTransactionCount(0);
-      fetchPromo();
-    }
-  }, [visible]);
-
-  const fetchPromo = async () => {
-    const { data } = await supabase
-      .from("promo")
-      .select("*")
-      .eq("is_active", true)
-      .single();
-
-    if (data) setActivePromo(data);
-  };
-
-  useEffect(() => {
-    if (name.length === 0) {
-      setSuggestions([]);
-      return;
-    }
-
-    const fetchMembers = async () => {
-      const { data } = await supabase
-        .from("members")
-        .select("*")
-        .ilike("name", `%${name}%`)
-        .limit(5);
-
-      if (data) setSuggestions(data);
-    };
-
-    fetchMembers();
-  }, [name]);
-
-  useEffect(() => {
-    if (!phone) return;
-
-    const fetchCount = async () => {
-      const { data } = await supabase
-        .from("transactions")
-        .select("transaction_count")
-        .eq("phone", phone)
-        .order("transaction_count", { ascending: false })
-        .limit(1);
-
-      const last = data && data.length > 0 ? data[0].transaction_count : 0;
-      setTransactionCount(last);
-    };
-
-    fetchCount();
-  }, [phone]);
-
-  useEffect(() => {
-    if (!amount || !activePromo) {
-      setAutoDiscount(0);
-      return;
-    }
-
-    const nextCount = transactionCount + 1;
-
-    if (
-      nextCount >= activePromo.target_transaction &&
-      Number(amount) >= activePromo.minimum_amount
-    ) {
-      const discount = (Number(amount) * activePromo.discount_percent) / 100;
-      setAutoDiscount(discount);
-    } else {
-      setAutoDiscount(0);
-    }
-  }, [amount, transactionCount, activePromo]);
+  const [showPicker, setShowPicker] = useState(false);
 
   const finalAmount = Number(amount || 0) - Number(autoDiscount || 0);
-
-  const formatRupiah = (n: number) => new Intl.NumberFormat("id-ID").format(n);
-
-  const handleSave = async () => {
-    if (!name || !phone || !amount) {
-      showToast("error", "Lengkapi semua field");
-      return;
-    }
-
-    setSaving(true);
-    const { error } = await supabase.from("transactions").insert({
-      name,
-      phone,
-      amount: Number(amount),
-      discount: autoDiscount,
-      paid,
-      transaction_count: transactionCount + 1,
-    });
-
-    setSaving(false);
-
-    if (error) {
-      showToast("error", "Gagal menambahkan transaksi");
-      return;
-    }
-
-    showToast("success", "Transaksi berhasil ditambahkan");
-    onClose(true);
-  };
+  const formatRupiah = (n: number) =>
+    new Intl.NumberFormat("id-ID").format(n);
 
   if (!visible) return null;
 
   return (
-    <Modal transparent animationType="slide">
+    <Modal transparent animationType="fade" visible={visible}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        className="flex-1 bg-black/40 justify-end"
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}
       >
-        <ScrollView
-          className="bg-white rounded-t-4xl"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <LinearGradient
-            colors={["#1e3a8a", "#3b82f6"]}
-            className="rounded-t-4xl px-6 py-6"
+        <View style={{ flex: 1, justifyContent: "flex-end" }}>
+          <View
+            style={{
+              height: "90%",
+              backgroundColor: "white",
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              overflow: "hidden",
+            }}
           >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
-                  <Ionicons name="receipt" size={24} color="white" />
+            {/* HEADER */}
+            <LinearGradient colors={["#4f46e5", "#6366f1"]} style={{ padding: 20, paddingTop: 24, paddingBottom: 32 }}>
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Text className="text-white text-2xl font-bold">Tambah Transaksi</Text>
+                  <Text className="text-white/80 text-sm mt-1">Lengkapi data transaksi customer</Text>
                 </View>
-                <Text className="text-white text-2xl font-bold ml-3">
-                  Tambah Transaksi
-                </Text>
+                <TouchableOpacity onPress={() => onClose(false)} className="bg-white/20 p-2 rounded-full">
+                  <Ionicons name="close" size={24} color="white" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() => onClose(false)}
-                className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
-              >
-                <Ionicons name="close" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-          <View className="px-6 py-6 flex-1">
-            <Input
-              label="Nama Customer"
-              placeholder="Cari / masukkan nama"
-              value={name}
-              onChangeText={setName}
-              icon="person-outline"
-            />
-            {suggestions.length > 0 && (
-              <View className="bg-slate-50 rounded-2xl mb-3 border border-slate-100 overflow-hidden -mt-3">
-                {suggestions.map((s) => (
-                  <TouchableOpacity
-                    key={s.id}
-                    onPress={() => {
-                      setName(s.name);
-                      setPhone(s.phone);
-                      setSuggestions([]);
-                    }}
-                    className="px-4 py-3 border-b border-slate-100 flex-row justify-between"
+            </LinearGradient>
+
+            <View style={{ flex: 1 }}>
+              <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+                
+                {/* SELECT MEMBER SECTION */}
+                <Text className="text-slate-500 font-semibold mb-2 ml-1">Customer</Text>
+                {!name ? (
+                  <TouchableOpacity 
+                    onPress={() => setShowPicker(true)}
+                    className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex-row justify-between items-center mb-6"
                   >
-                    <Text className="font-interMedium text-slate-800">
-                      {s.name}
-                    </Text>
-                    <Text className="text-slate-500 font-inter">
-                      {s.phone}
-                    </Text>
+                    <Text className="text-slate-400">Pilih Member dari daftar...</Text>
+                    <Ionicons name="people-outline" size={20} color="#6366f1" />
                   </TouchableOpacity>
-                ))}
-              </View>
-            )}
-            <Input
-              label="No HP"
-              placeholder="081234567890"
-              value={phone}
-              onChangeText={setPhone}
-              icon="call-outline"
-              keyboardType="phone-pad"
-            />
-            <Input
-              label="Harga"
-              placeholder="Masukkan harga"
-              value={amount}
-              onChangeText={setAmount}
-              icon="cash-outline"
-              keyboardType="number-pad"
-            />
+                ) : (
+                  <View className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex-row justify-between items-center mb-6">
+                    <View>
+                      <Text className="text-slate-900 font-bold">{name}</Text>
+                      <Text className="text-slate-500 text-xs">{phone}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => {setName(""); setPhone("");}} className="bg-white px-3 py-1 rounded-lg border border-indigo-200">
+                      <Text className="text-indigo-600 text-xs font-bold">Ganti</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-            <View className="flex-row items-center justify-between bg-slate-50 rounded-2xl px-4 py-4 mb-5 border border-slate-100">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="card-outline"
-                  size={20}
-                  color="#64748b"
-                  style={{ marginRight: 10 }}
+                <Input
+                  label="Harga Layanan"
+                  placeholder="0"
+                  value={amount}
+                  onChangeText={setAmount}
+                  icon="cash-outline"
+                  keyboardType="number-pad"
                 />
-                <Text className="font-interMedium text-slate-700">
-                  Status Pembayaran
-                </Text>
-              </View>
-              <View className="flex-row items-center">
-                <Text
-                  className={`font-interMedium mr-2 ${
-                    paid ? "text-emerald-600" : "text-rose-600"
-                  }`}
-                >
-                  {paid ? "Paid" : "Unpaid"}
-                </Text>
-                <Switch
-                  value={paid}
-                  onValueChange={setPaid}
-                  trackColor={{ false: "#fecaca", true: "#a7f3d0" }}
-                  thumbColor={paid ? "#059669" : "#ef4444"}
-                />
-              </View>
-            </View>
 
-            {autoDiscount > 0 && (
-              <View className="bg-emerald-50 rounded-2xl p-4 mb-5 border border-emerald-100">
-                <Text className="text-emerald-700 font-interMedium">
-                  🎉 Promo terpakai (-{activePromo?.discount_percent}%)
-                </Text>
+                <View className="bg-white rounded-2xl px-4 py-4 mb-5 shadow-sm border border-slate-100">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-slate-700 font-medium">Status Pembayaran</Text>
+                    <View className="flex-row items-center">
+                      <Text className={`mr-2 font-semibold ${paid ? "text-emerald-500" : "text-red-500"}`}>{paid ? "Paid" : "Unpaid"}</Text>
+                      <Switch value={paid} onValueChange={setPaid} trackColor={{ false: "#fecaca", true: "#bbf7d0" }} thumbColor={paid ? "#16a34a" : "#dc2626"} />
+                    </View>
+                  </View>
+                </View>
+
+                {autoDiscount > 0 && (
+                  <View className="bg-emerald-50 rounded-2xl p-4 mb-5 border border-emerald-100 flex-row items-center gap-2">
+                    <Ionicons name="gift" size={20} color="#059669" />
+                    <Text className="text-emerald-700 font-medium flex-1">Promo terpakai: Potongan {formatRupiah(autoDiscount)}</Text>
+                  </View>
+                )}
+
+                <View className="bg-indigo-600 rounded-3xl p-6 mb-6">
+                  <Text className="text-white/80 text-sm">Total Bayar</Text>
+                  <Text className="text-white text-3xl font-bold mt-1">Rp {formatRupiah(finalAmount)}</Text>
+                </View>
+              </ScrollView>
+
+              <View className="px-5 py-4 border-t border-slate-100 bg-white">
+                <Button title="Simpan Transaksi" onPress={handleSave} loading={loading} disabled={!name || loading} />
               </View>
-            )}
-
-            <View className="bg-indigo-50 rounded-2xl p-4 mb-5 border border-indigo-100">
-              <Text className="text-indigo-500 font-inter text-sm">
-                Total Bayar
-              </Text>
-              <Text className="text-indigo-700 text-xl font-interBold mt-1">
-                Rp {formatRupiah(finalAmount)}
-              </Text>
-            </View>
-
-            <View className="flex-row gap-3 mb-4">
-              <Button
-                title="Batal"
-                onPress={() => onClose(false)}
-                variant="outline"
-                size="lg"
-                fullWidth
-              />
-              <Button
-                title="Simpan"
-                onPress={handleSave}
-                loading={saving}
-                disabled={saving}
-                size="lg"
-                fullWidth
-              />
             </View>
           </View>
-        </ScrollView>
+        </View>
+
+        {/* MODAL PICKER (OVERLAY) */}
+        {showPicker && (
+          <View className="absolute inset-0 bg-white z-[9999]">
+             <SafeAreaView className="flex-1">
+                <View className="p-4 border-b border-slate-100 flex-row items-center">
+                  <TouchableOpacity onPress={() => setShowPicker(false)} className="p-2">
+                    <Ionicons name="arrow-back" size={24} color="#1e293b" />
+                  </TouchableOpacity>
+                  <Text className="text-xl font-bold ml-2">Pilih Member</Text>
+                </View>
+                <View className="p-4">
+                  <Input placeholder="Cari nama atau no HP..." value={searchMember} onChangeText={setSearchMember} icon="search-outline" />
+                </View>
+                <ScrollView className="flex-1 px-4">
+                  {filteredMembers.map(m => (
+                    <TouchableOpacity 
+                      key={m.id} 
+                      onPress={() => { handleSelectMember(m); setShowPicker(false); }}
+                      className="py-4 border-b border-slate-100 flex-row justify-between items-center"
+                    >
+                      <View>
+                        <Text className="text-slate-800 font-bold">{m.name}</Text>
+                        <Text className="text-slate-500 text-xs mt-1">{m.phone}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+             </SafeAreaView>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </Modal>
   );

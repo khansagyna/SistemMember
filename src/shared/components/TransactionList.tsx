@@ -1,16 +1,16 @@
-import { View, Text, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import Skeleton from '@/shared/components/Skeleton'
 import TransactionItem from '../../features/dashboard/components/TransactionItem'
 import TransactionItemSkeleton from '../../features/dashboard/components/TransactionItemSkeleton'
-import { TransactionListProps } from '../../features/dashboard/types/props'
+import { TransactionListProps } from '@/features/types/props'
 
 export default function TransactionList({
   transactions,
-  data,
   loading,
   formatRupiah,
-  onDelete
-}: TransactionListProps & { data?: any[], onDelete?: (id: string) => void }) {
+  onDelete,
+  onEdit
+}: TransactionListProps) {
 
   if (loading) {
     return (
@@ -23,35 +23,40 @@ export default function TransactionList({
         </View>
       </View>
     )
+
+
   }
 
   return (
-    <View>
-
-      <Text className='text-xl mb-4 font-interBold'>
-        Transaksi Terbaru
-      </Text>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <Text className='text-xl mb-4 font-interBold' >
+        Daftar Transaksi
+      </Text >
 
       <View className='mb-28'>
 
-        {transactions && transactions.slice(0, 8).map(item => (
+        {transactions?.map(item => (
           <TransactionItem
             key={item.id}
             item={item}
             formatRupiah={formatRupiah}
+            onDelete={onDelete}
+            onEdit={onEdit}
           />
         ))}
 
-        {data && data.map(item => (
-          <TransactionItem
-            key={item.id}
-            item={item}
-            formatRupiah={formatRupiah}
-          />
-        ))}
+        {!transactions?.length && (
+          <View className="bg-white rounded-3xl p-8 items-center justify-center border border-dashed border-slate-300">
+            <Text className="text-slate-400 font-inter">
+              Tidak ada transaksi
+            </Text>
+          </View>
+        )}
 
       </View>
 
-    </View>
+    </ScrollView >
+
+
   )
 }
