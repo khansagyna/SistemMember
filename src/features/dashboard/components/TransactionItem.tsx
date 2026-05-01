@@ -11,27 +11,31 @@ export default function TransactionItem({ item, formatRupiah }: TransactionItemP
         <View className='flex-row gap-3 flex-1'>
 
           <View className='w-12 h-12 rounded-full bg-indigo-100 items-center justify-center'>
-            <Text>
+            <Text className='font-interMedium'>
               {item.name?.slice(0, 2)?.toUpperCase()}
             </Text>
           </View>
 
           <View>
-            <Text>{item.name}</Text>
-            <Text>{item.phone}</Text>
+            <Text className='font-inter'>{item.name}</Text>
+            <Text className='font-inter'>{item.phone}</Text>
           </View>
 
         </View>
 
         <View className='items-end'>
 
-          <Text>
+          <Text className='font-interBold text-lg'>
             Rp {formatRupiah(
               (item.amount || 0) - (item.discount || 0)
             )}
           </Text>
-
-          <Text>
+          <Text
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${item.paid
+                ? 'bg-green-100 text-green-700'
+                : 'bg-orange-100 text-orange-700'
+              }`}
+          >
             {item.paid ? 'Paid' : 'Piutang'}
           </Text>
 

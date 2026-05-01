@@ -34,12 +34,25 @@ export function useDashboard() {
 
     const stats = useMemo(() => {
         const today = new Date().toDateString()
+        const thisMonth = new Date().getMonth()
+        const thisYear = new Date().getFullYear()
 
         const todayTrx = transactions.filter(
             t => new Date(t.created_at).toDateString() === today
         )
 
         const omzet = todayTrx.reduce(
+            (a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0
+        )
+
+        const omzetBulanIni = transactions
+            .filter(t => {
+                const d = new Date(t.created_at)
+                return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+            })
+            .reduce((a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0)
+
+        const totalOmzet = transactions.reduce(
             (a, t) => a + ((t.amount || 0) - (t.discount || 0)), 0
         )
 
@@ -52,6 +65,8 @@ export function useDashboard() {
         return {
             trxToday: todayTrx.length,
             omzet,
+            omzetBulanIni,
+            totalOmzet,
             unpaid
         }
     }, [transactions])

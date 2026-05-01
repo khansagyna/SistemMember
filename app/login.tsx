@@ -5,10 +5,11 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   Platform,
-  TextInput
+  TextInput,
+  Animated,
 } from 'react-native'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 
@@ -17,10 +18,10 @@ import {
   Mail,
   Eye,
   EyeOff,
-  Users
+  Users,
+  AlertCircle,
+  CheckCircle,
 } from 'lucide-react-native'
-
-import Input from '@/src/shared/components/Input'
 
 export default function Login() {
 
@@ -31,10 +32,100 @@ export default function Login() {
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
 
-  const handleLogin = async () => {
+  // Banner states
+  const [errorMessage, setErrorMessage] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
 
+  // Animations
+  const errorOpacity = useRef(new Animated.Value(0)).current
+  const errorTranslateY = useRef(new Animated.Value(-10)).current
+  const errorShake = useRef(new Animated.Value(0)).current
+  const successOpacity = useRef(new Animated.Value(0)).current
+  const successScale = useRef(new Animated.Value(0.9)).current
+
+  // Show error banner with shake
+  const showError = (msg: string) => {
+    setErrorMessage(msg)
+    errorOpacity.setValue(0)
+    errorTranslateY.setValue(-10)
+    errorShake.setValue(0)
+
+    Animated.parallel([
+      Animated.timing(errorOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(errorTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Shake animation
+      Animated.sequence([
+        Animated.timing(errorShake, { toValue: 8, duration: 60, useNativeDriver: true }),
+        Animated.timing(errorShake, { toValue: -8, duration: 60, useNativeDriver: true }),
+        Animated.timing(errorShake, { toValue: 6, duration: 60, useNativeDriver: true }),
+        Animated.timing(errorShake, { toValue: -6, duration: 60, useNativeDriver: true }),
+        Animated.timing(errorShake, { toValue: 0, duration: 60, useNativeDriver: true }),
+      ]).start()
+    })
+
+    // Auto dismiss after 4s
+    setTimeout(() => {
+      Animated.timing(errorOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setErrorMessage(''))
+    }, 4000)
+  }
+
+  // Show success banner
+  const showSuccessBanner = () => {
+    setShowSuccess(true)
+    successOpacity.setValue(0)
+    successScale.setValue(0.9)
+
+    Animated.parallel([
+      Animated.timing(successOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(successScale, {
+        toValue: 1,
+        friction: 6,
+        tension: 80,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }
+
+  // Clear error when typing
+  const handleEmailChange = (text: string) => {
+    setEmail(text)
+    setEmailError('')
+    if (errorMessage) {
+      setErrorMessage('')
+      errorOpacity.setValue(0)
+    }
+  }
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text)
+    setPasswordError('')
+    if (errorMessage) {
+      setErrorMessage('')
+      errorOpacity.setValue(0)
+    }
+  }
+
+  const handleLogin = async () => {
     setEmailError('')
     setPasswordError('')
+    setErrorMessage('')
 
     if (!email) {
       setEmailError('Email wajib diisi')
@@ -56,11 +147,21 @@ export default function Login() {
     setLoading(false)
 
     if (error) {
-      setEmailError('Login gagal')
+      if (error.message.includes('Invalid login')) {
+        showError('Email atau password salah')
+      } else if (error.message.includes('network')) {
+        showError('Koneksi gagal. Periksa internet Anda')
+      } else {
+        showError('Login gagal. Silakan coba lagi')
+      }
       return
     }
 
-    router.replace('/(tabs)/dashboard')
+    // Show success then navigate
+    showSuccessBanner()
+    setTimeout(() => {
+      router.replace('/(tabs)/dashboard')
+    }, 800)
   }
 
   return (
@@ -93,27 +194,70 @@ export default function Login() {
 
           </View>
 
+          {/* Error Banner */}
+          {errorMessage !== '' && (
+            <Animated.View
+              style={{
+                opacity: errorOpacity,
+                transform: [
+                  { translateY: errorTranslateY },
+                  { translateX: errorShake },
+                ],
+              }}
+              className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 mb-5 flex-row items-center"
+            >
+              <View className="w-8 h-8 rounded-full bg-red-100 items-center justify-center mr-3">
+                <AlertCircle size={18} color="#ef4444" />
+              </View>
+              <Text className="text-red-700 font-interMedium flex-1 text-sm">
+                {errorMessage}
+              </Text>
+            </Animated.View>
+          )}
+
+          {/* Success Banner */}
+          {showSuccess && (
+            <Animated.View
+              style={{
+                opacity: successOpacity,
+                transform: [{ scale: successScale }],
+              }}
+              className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 mb-5 flex-row items-center"
+            >
+              <View className="w-8 h-8 rounded-full bg-emerald-100 items-center justify-center mr-3">
+                <CheckCircle size={18} color="#059669" />
+              </View>
+              <Text className="text-emerald-700 font-interMedium flex-1 text-sm">
+                Login berhasil! Mengalihkan...
+              </Text>
+            </Animated.View>
+          )}
+
           <View className="mb-5">
 
             <Text className="mb-2 font-interMedium text-slate-700">
               Email
             </Text>
 
-            <View className="bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center">
+            <View className={`bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center ${emailError ? 'border border-red-300' : ''}`}>
 
               <Mail
                 size={18}
-                color="#64748b"
+                color={emailError ? '#ef4444' : '#64748b'}
               />
 
               <TextInput
                 placeholder="email@example.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={handleEmailChange}
                 className="ml-3 flex-1 font-inter"
               />
 
             </View>
+
+            {emailError !== '' && (
+              <Text className="text-red-500 text-sm mt-1.5 font-inter ml-1">{emailError}</Text>
+            )}
 
           </View>
           <View className="mb-6">
@@ -122,18 +266,18 @@ export default function Login() {
               Password
             </Text>
 
-            <View className="bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center">
+            <View className={`bg-slate-100 rounded-2xl px-4 py-4 flex-row items-center ${passwordError ? 'border border-red-300' : ''}`}>
 
               <Lock
                 size={18}
-                color="#64748b"
+                color={passwordError ? '#ef4444' : '#64748b'}
               />
 
               <TextInput
                 placeholder="Password"
                 secureTextEntry={!showPassword}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={handlePasswordChange}
                 className="ml-3 flex-1 font-inter"
               />
 
@@ -151,15 +295,19 @@ export default function Login() {
 
             </View>
 
+            {passwordError !== '' && (
+              <Text className="text-red-500 text-sm mt-1.5 font-inter ml-1">{passwordError}</Text>
+            )}
+
           </View>
 
           <TouchableOpacity
             onPress={handleLogin}
-            disabled={loading}
-            className='bg-indigo-600 p-5 rounded-2xl'
+            disabled={loading || showSuccess}
+            className={`p-5 rounded-2xl ${showSuccess ? 'bg-emerald-500' : 'bg-indigo-600'}`}
           >
             <Text className='text-white text-center font-interBold text-base'>
-              {loading ? 'Loading...' : 'Masuk'}
+              {loading ? 'Loading...' : showSuccess ? 'Berhasil ✓' : 'Masuk'}
             </Text>
           </TouchableOpacity>
 

@@ -8,6 +8,8 @@ export type DashboardStats = {
   trxToday: number
   omzet: number
   unpaid: number
+  omzetBulanIni: number
+  totalOmzet: number
 }
 
 export type TransactionItemProps = {
@@ -25,12 +27,13 @@ export type StatsGridProps = {
   transactions: Transaction[]
   members: number
   stats: DashboardStats
+  loading?: boolean
 }
 
 export type StatsCardProps = {
   title: string
   value: string | number
-  icon: IconName
+  icon: string
   color: string
 }
 
@@ -41,4 +44,10 @@ export type QuickActionProps = {
 
 export type DashboardProps = {
   onLogout: () => void
+  stats: {
+    trxToday: number
+    unpaid: number
+    trxTodayAmount: number
+  }
+  loading?: boolean
 }

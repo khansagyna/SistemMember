@@ -1,30 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   Modal,
-  TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Switch,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Input from "@/shared/components/Input";
+import Button from "@/shared/components/Button";
+import { useToast } from "@/shared/hooks/useToast";
 
 interface Props {
+  visible: boolean;
   data: any;
-  onClose: (updated?: boolean) => void; // boolean opsional
+  onClose: (updated?: boolean) => void;
 }
 
-export default function EditTransactionModal({ data, onClose }: Props) {
-  const [amount, setAmount] = useState(String(data.amount));
-  const [discount, setDiscount] = useState(String(data.discount));
-  const [paid, setPaid] = useState(data.paid);
+export default function EditTransactionModal({ visible, data, onClose }: Props) {
+  const [amount, setAmount] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [paid, setPaid] = useState(true);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (visible && data) {
+      setAmount(String(data.amount || 0));
+      setDiscount(String(data.discount || 0));
+      setPaid(data.paid);
+    } else {
+      setAmount("");
+      setDiscount("");
+      setPaid(true);
+    }
+  }, [visible, data]);
 
   const finalAmount = Number(amount || 0) - Number(discount || 0);
+  const formatRupiah = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 
-  // 🔥 handle update
   const handleUpdate = async () => {
+    if (!amount) {
+      showToast("error", "Harga tidak boleh kosong");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -39,80 +64,138 @@ export default function EditTransactionModal({ data, onClose }: Props) {
 
       if (error) throw error;
 
-      onClose(true); // beri tahu parent ada update
-    } catch (err: any) {
-      Alert.alert("Error", err.message);
+      showToast("success", "Transaksi berhasil diupdate");
+      onClose(true);
+    } catch (err) {
+      showToast("error", "Gagal update transaksi");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!visible) return null;
+
   return (
     <Modal transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <View style={styles.handle} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        className="flex-1 bg-black/40 justify-end"
+      >
+        <ScrollView
+          className="bg-white rounded-t-4xl"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <LinearGradient
+            colors={["#1e3a8a", "#3b82f6"]}
+            className="rounded-t-4xl px-6 py-6"
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
+                  <Ionicons name="pencil" size={24} color="white" />
+                </View>
+                <Text className="text-white text-2xl font-bold ml-3">
+                  Edit Transaksi
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => onClose(false)}
+                className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
+              >
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
 
-          <Text style={styles.title}>Edit Transaksi</Text>
+          <View className="px-6 py-6 flex-1">
+            {/* Customer Info */}
+            <View className="bg-slate-50 rounded-2xl p-4 mb-5 border border-slate-100">
+              <Text className="text-slate-500 text-sm font-inter">Customer</Text>
+              <Text className="text-lg font-interBold text-slate-800 mt-1">{data?.name}</Text>
+              <Text className="text-slate-500 font-inter">{data?.phone}</Text>
+            </View>
 
-          <Text style={styles.label}>Harga</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={setAmount}
-          />
+            <Input  
+              label="Harga"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="number-pad"
+              placeholder="Masukkan harga"
+              icon="cash-outline"
+            />
 
-          <Text style={styles.label}>Diskon</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={discount}
-            onChangeText={setDiscount}
-          />
+            <Input
+              label="Diskon"
+              value={discount}
+              onChangeText={setDiscount}
+              keyboardType="number-pad"
+              placeholder="Masukkan diskon (jika ada)"
+              icon="pricetag-outline"
+            />
 
-          <View style={styles.statusRow}>
-            <Text style={styles.label}>Status</Text>
-            <TouchableOpacity
-              style={[styles.statusBtn, { backgroundColor: paid ? "#16a34a" : "#dc2626" }]}
-              onPress={() => setPaid(!paid)}
-            >
-              <Text style={styles.statusText}>{paid ? "Paid" : "Unpaid"}</Text>
-            </TouchableOpacity>
+            {/* Status Pembayaran */}
+            <View className="flex-row items-center justify-between bg-slate-50 rounded-2xl px-4 py-4 mb-5 border border-slate-100 mt-1">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="card-outline"
+                  size={20}
+                  color="#64748b"
+                  style={{ marginRight: 10 }}
+                />
+                <Text className="font-interMedium text-slate-700">
+                  Status Pembayaran
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <Text
+                  className={`font-interMedium mr-2 ${
+                    paid ? "text-emerald-600" : "text-rose-600"
+                  }`}
+                >
+                  {paid ? "Paid" : "Unpaid"}
+                </Text>
+                <Switch
+                  value={paid}
+                  onValueChange={setPaid}
+                  trackColor={{ false: "#fecaca", true: "#a7f3d0" }}
+                  thumbColor={paid ? "#059669" : "#ef4444"}
+                />
+              </View>
+            </View>
+
+            {/* Total Bayar */}
+            <View className="bg-indigo-50 rounded-2xl p-4 mb-5 border border-indigo-100">
+              <Text className="text-indigo-500 font-inter text-sm">Total Bayar</Text>
+              <Text className="text-indigo-700 text-xl font-interBold mt-1">
+                Rp {formatRupiah(finalAmount)}
+              </Text>
+            </View>
+
+            {/* Buttons */}
+            <View className="flex-row gap-3 mb-4">
+              <View className="flex-1">
+                <Button 
+                  title="Batal" 
+                  onPress={() => onClose(false)} 
+                  variant="outline" 
+                  size="lg"
+                  fullWidth 
+                />
+              </View>
+              <View className="flex-1">
+                <Button
+                  title="Update"
+                  onPress={handleUpdate}
+                  loading={loading}
+                  disabled={loading}
+                  size="lg"
+                  fullWidth
+                />
+              </View>
+            </View>
           </View>
-
-          <View style={styles.previewBox}>
-            <Text style={styles.previewLabel}>Total Sekarang</Text>
-            <Text style={styles.previewValue}>Rp {finalAmount.toLocaleString()}</Text>
-          </View>
-
-          <TouchableOpacity style={styles.saveBtn} onPress={() => handleUpdate()} disabled={loading}>
-            <Text style={styles.saveText}>{loading ? "Updating..." : "Update Transaksi"}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => onClose()}>
-            <Text style={styles.cancel}>Batal</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
-  modal: { backgroundColor: "#fff", padding: 25, borderTopLeftRadius: 30, borderTopRightRadius: 30 },
-  handle: { width: 40, height: 5, backgroundColor: "#e5e7eb", borderRadius: 10, alignSelf: "center", marginBottom: 15 },
-  title: { fontSize: 20, fontWeight: "800", marginBottom: 15 },
-  label: { fontWeight: "600", marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: "#f3f4f6", borderRadius: 16, padding: 15 },
-  statusRow: { marginTop: 15 },
-  statusBtn: { padding: 12, borderRadius: 16, alignItems: "center", marginTop: 8 },
-  statusText: { color: "white", fontWeight: "700" },
-  previewBox: { backgroundColor: "#eef2ff", padding: 15, borderRadius: 18, marginTop: 20 },
-  previewLabel: { color: "#6366f1" },
-  previewValue: { fontSize: 20, fontWeight: "800", color: "#4f46e5", marginTop: 4 },
-  saveBtn: { backgroundColor: "#4f46e5", padding: 16, borderRadius: 20, alignItems: "center", marginTop: 20 },
-  saveText: { color: "white", fontWeight: "700" },
-  cancel: { textAlign: "center", marginTop: 15, color: "#6b7280" },
-});

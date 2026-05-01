@@ -7,12 +7,11 @@ export const transactionApi = {
 
     getAll: async (): Promise<Transaction[]> => {
         const { data, error } = await supabase
-            .from('transaction')
+            .from('transactions')
             .select('*')
             .order('created_at', { ascending: false })
 
         if (error) throw error;
-
         return data ?? []
     },
 
@@ -53,5 +52,23 @@ export const transactionApi = {
             .insert(payload)
 
         if (error) throw error
-    }
+    },
+
+    update: async (id: string, data: { amount?: number; discount?: number; paid?: boolean }) => {
+        const { error } = await supabase
+            .from('transactions')
+            .update(data)
+            .eq('id', id)
+
+        if (error) throw error
+    },
+
+    remove: async (id: string) => {
+        const { error } = await supabase
+            .from('transactions')
+            .delete()
+            .eq('id', id)
+
+        if (error) throw error
+    },
 }

@@ -16,3 +16,4 @@ export type TransactionInsert = {
   paid: boolean
   transaction_count: number
 }
+
