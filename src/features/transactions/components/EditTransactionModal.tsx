@@ -46,16 +46,10 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
 
   return (
     <Modal transparent animationType="fade">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}
-      > <View className="flex-1 justify-end">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <View className="flex-1 justify-end">
+          <View className="bg-white overflow-hidden" style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, height: "90%"}}>
 
-          <View
-            className="bg-white overflow-hidden"
-            style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
-          >
-            {/* HEADER */}
             <LinearGradient
               colors={["#4f46e5", "#6366f1"]}
               className="px-6 pt-6 pb-8"
