@@ -1,16 +1,16 @@
-import { View } from 'react-native'
-import Skeleton from '@/shared/components/Skeleton'
+import { View } from 'react-native';
+import Skeleton from '@/shared/components/Skeleton';
 
 export default function StatsCardSkeleton() {
   return (
-    <View className="bg-white rounded-[24px] p-4 shadow-sm shadow-slate-200/50 border border-slate-50 min-h-[110px]">
-      <View className="flex-row justify-between items-start mb-4">
-        <Skeleton className="w-10 h-10 rounded-full" />
+    <View className="min-h-[110px] rounded-[24px] border border-slate-50 bg-white p-4 shadow-sm shadow-slate-200/50">
+      <View className="mb-4 flex-row items-start justify-between">
+        <Skeleton className="h-10 w-10 rounded-full" />
       </View>
       <View>
-        <Skeleton className="w-20 h-3.5 rounded-md mb-2.5" />
-        <Skeleton className="w-28 h-6 rounded-lg" />
+        <Skeleton className="mb-2.5 h-3.5 w-20 rounded-md" />
+        <Skeleton className="h-6 w-28 rounded-lg" />
       </View>
     </View>
-  )
+  );
 }

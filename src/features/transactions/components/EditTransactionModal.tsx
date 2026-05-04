@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   Platform,
   ScrollView,
   Switch,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import Input from "@/shared/components/Input";
-import Button from "@/shared/components/Button";
-import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Input from '@/shared/components/Input';
+import Button from '@/shared/components/Button';
+import { useUpdateTransaction } from '../hooks/useUpdateTransaction';
 
 interface Props {
   visible: boolean;
@@ -22,13 +22,11 @@ interface Props {
 }
 
 export default function EditTransactionModal({ visible, data, onClose }: Props) {
-  const [amount, setAmount] = useState("");
-  const [discount, setDiscount] = useState("");
+  const [amount, setAmount] = useState('');
+  const [discount, setDiscount] = useState('');
   const [paid, setPaid] = useState(true);
 
-  const { handleUpdate, loading } = useUpdateTransaction(() =>
-    onClose(true)
-  );
+  const { handleUpdate, loading } = useUpdateTransaction(() => onClose(true));
 
   useEffect(() => {
     if (visible && data) {
@@ -39,35 +37,29 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
   }, [visible, data]);
 
   const finalAmount = Number(amount || 0) - Number(discount || 0);
-  const formatRupiah = (n: number) =>
-    new Intl.NumberFormat("id-ID").format(n);
+  const formatRupiah = (n: number) => new Intl.NumberFormat('id-ID').format(n);
 
   if (!visible) return null;
 
   return (
     <Modal transparent animationType="fade">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
         <View className="flex-1 justify-end">
-          <View className="bg-white overflow-hidden" style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, height: "90%"}}>
-
-            <LinearGradient
-              colors={["#4f46e5", "#6366f1"]}
-              className="px-6 pt-6 pb-8"
-            >
+          <View
+            className="overflow-hidden bg-white"
+            style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, height: '90%' }}>
+            <LinearGradient colors={['#4f46e5', '#6366f1']} className="px-6 pb-8 pt-6">
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Text className="text-white text-2xl font-bold">
-                    Edit Transaksi
-                  </Text>
-                  <Text className="text-white/80 text-sm mt-1">
-                    Update data transaksi
-                  </Text>
+                  <Text className="text-2xl font-bold text-white">Edit Transaksi</Text>
+                  <Text className="mt-1 text-sm text-white/80">Update data transaksi</Text>
                 </View>
 
                 <TouchableOpacity
                   onPress={() => onClose(false)}
-                  className="bg-white/20 p-2 rounded-full"
-                >
+                  className="rounded-full bg-white/20 p-2">
                   <Ionicons name="close" size={22} color="white" />
                 </TouchableOpacity>
               </View>
@@ -75,21 +67,15 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
 
             {/* CONTENT */}
             <View style={{ flex: 1 }}>
-
               <ScrollView
                 style={{ flex: 1 }}
                 className="px-6"
-                contentContainerStyle={{ paddingBottom: 20 }}
-              >
+                contentContainerStyle={{ paddingBottom: 20 }}>
                 {/* CUSTOMER */}
-                <View className="bg-white rounded-2xl p-4 mb-5 shadow-sm border border-slate-100">
-                  <Text className="text-slate-400 text-xs">Customer</Text>
-                  <Text className="text-lg font-semibold text-slate-800 mt-1">
-                    {data?.name}
-                  </Text>
-                  <Text className="text-slate-500 text-sm">
-                    {data?.phone}
-                  </Text>
+                <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                  <Text className="text-xs text-slate-400">Customer</Text>
+                  <Text className="mt-1 text-lg font-semibold text-slate-800">{data?.name}</Text>
+                  <Text className="text-sm text-slate-500">{data?.phone}</Text>
                 </View>
 
                 {/* INPUT */}
@@ -112,41 +98,39 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
                 />
 
                 {/* STATUS */}
-                <View className="bg-white rounded-2xl px-4 py-4 mb-5 shadow-sm border border-slate-100">
+                <View className="mb-5 rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-slate-700 font-medium">
-                      Status Pembayaran
-                    </Text>
+                    <Text className="font-medium text-slate-700">Status Pembayaran</Text>
 
                     <View className="flex-row items-center">
                       <Text
-                        className={`mr-2 font-semibold ${paid ? "text-emerald-500" : "text-red-500"
-                          }`}
-                      >
-                        {paid ? "Paid" : "Unpaid"}
+                        className={`mr-2 font-semibold ${
+                          paid ? 'text-emerald-500' : 'text-red-500'
+                        }`}>
+                        {paid ? 'Paid' : 'Unpaid'}
                       </Text>
 
                       <Switch
                         value={paid}
                         onValueChange={setPaid}
-                        trackColor={{ false: "#fecaca", true: "#bbf7d0" }}
-                        thumbColor={paid ? "#16a34a" : "#dc2626"}
+                        trackColor={{ false: '#fecaca', true: '#bbf7d0' }}
+                        thumbColor={paid ? '#16a34a' : '#dc2626'}
                       />
                     </View>
                   </View>
                 </View>
 
                 {/* TOTAL */}
-                <View className="bg-indigo-600 rounded-2xl p-5 mb-6">
-                  <Text className="text-white/80 text-sm">Total Bayar</Text>
-                  <Text className="text-white text-2xl font-bold mt-1">
+                <View className="mb-6 rounded-2xl bg-indigo-600 p-5">
+                  <Text className="text-sm text-white/80">Total Bayar</Text>
+                  <Text className="mt-1 text-2xl font-bold text-white">
                     Rp {formatRupiah(finalAmount)}
                   </Text>
                 </View>
               </ScrollView>
 
               {/* BUTTON FIXED */}
-              <View className="px-6 py-4 bg-white border-t border-slate-200">
+              <View className="border-t border-slate-200 bg-white px-6 py-4">
                 <View className="flex-row gap-3">
                   <View className="flex-1">
                     <Button
@@ -177,10 +161,8 @@ export default function EditTransactionModal({ visible, data, onClose }: Props) 
                   </View>
                 </View>
               </View>
-
             </View>
           </View>
-
         </View>
       </KeyboardAvoidingView>
     </Modal>

@@ -1,5 +1,5 @@
-import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import React, { createContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export interface Member {
   id: string;
@@ -36,40 +36,34 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchMembers = async () => {
     const { data } = await supabase
-      .from("members")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('members')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (data) setMembers(data);
   };
 
   const fetchTransactions = async () => {
     const { data } = await supabase
-      .from("transactions")
+      .from('transactions')
       .select(`*, members(name)`)
-      .order("created_at", { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (data) setTransactions(data);
   };
 
   const addMember = async (name: string, phone: string) => {
-    await supabase.from("members").insert([{ name, phone }]);
+    await supabase.from('members').insert([{ name, phone }]);
     fetchMembers();
   };
 
   const deleteMember = async (id: string) => {
-    await supabase.from("members").delete().eq("id", id);
+    await supabase.from('members').delete().eq('id', id);
     fetchMembers();
   };
 
-  const addTransaction = async (
-    member_id: string,
-    amount: number,
-    discount: number
-  ) => {
-    await supabase.from("transactions").insert([
-      { member_id, amount, discount },
-    ]);
+  const addTransaction = async (member_id: string, amount: number, discount: number) => {
+    await supabase.from('transactions').insert([{ member_id, amount, discount }]);
     fetchTransactions();
   };
 
@@ -88,8 +82,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         addMember,
         deleteMember,
         addTransaction,
-      }}
-    >
+      }}>
       {children}
     </AppContext.Provider>
   );

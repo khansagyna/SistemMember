@@ -1,57 +1,43 @@
-import { useState } from 'react'
-import { SafeAreaView, ScrollView, RefreshControl, View } from 'react-native'
-import { useDashboard } from './hooks/useDashboard'
-import DashboardHeader from './components/DashboardHeader'
-import StatsGrid from './components/StatsGrid'
-import QuickActions from './components/QuickActions'
-import TransactionList from '../../shared/components/TransactionList'
-import { router } from 'expo-router'
-import { supabase } from '@/lib/supabase'
-import ConfirmModal from '@/shared/components/ConfirmModal'
+import { useState } from 'react';
+import { SafeAreaView, ScrollView, RefreshControl, View } from 'react-native';
+import { useDashboard } from './hooks/useDashboard';
+import DashboardHeader from './components/DashboardHeader';
+import StatsGrid from './components/StatsGrid';
+import QuickActions from './components/QuickActions';
+import TransactionList from '../../shared/components/TransactionList';
+import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import ConfirmModal from '@/shared/components/ConfirmModal';
 
 export default function DashboardScreen() {
+  const { transactions, members, loading, refreshing, refresh, stats } = useDashboard();
 
-  const {
-    transactions,
-    members,
-    loading,
-    refreshing,
-    refresh,
-    stats
-  } = useDashboard()
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
-  const [loggingOut, setLoggingOut] = useState(false)
-
-  const formatRupiah = (n: number) =>
-    new Intl.NumberFormat('id-ID').format(n)
+  const formatRupiah = (n: number) => new Intl.NumberFormat('id-ID').format(n);
 
   const handleLogoutPress = () => {
-    setShowLogoutModal(true)
-  }
+    setShowLogoutModal(true);
+  };
 
   const handleLogoutConfirm = async () => {
-    setLoggingOut(true)
-    await supabase.auth.signOut()
-    setLoggingOut(false)
-    setShowLogoutModal(false)
-    router.replace('/login')
-  }
+    setLoggingOut(true);
+    await supabase.auth.signOut();
+    setLoggingOut(false);
+    setShowLogoutModal(false);
+    router.replace('/login');
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-slate-100">
-      
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
-        }
-      >
-
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
         <DashboardHeader
           onLogout={handleLogoutPress}
-           stats={{
+          stats={{
             ...stats,
             trxTodayAmount: stats.omzet,
           }}
@@ -59,7 +45,6 @@ export default function DashboardScreen() {
         />
 
         <View className="mt-4">
-
           {/* Stats */}
           <StatsGrid
             transactions={transactions}
@@ -84,9 +69,7 @@ export default function DashboardScreen() {
               formatRupiah={formatRupiah}
             />
           </View>
-
         </View>
-
       </ScrollView>
 
       {/* Logout Confirmation Modal */}
@@ -102,7 +85,6 @@ export default function DashboardScreen() {
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutModal(false)}
       />
-
     </SafeAreaView>
-  )
+  );
 }

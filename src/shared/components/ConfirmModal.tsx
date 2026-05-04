@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,22 +7,22 @@ import {
   Animated,
   ActivityIndicator,
   Dimensions,
-} from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-type ConfirmVariant = 'danger' | 'warning' | 'info'
+type ConfirmVariant = 'danger' | 'warning' | 'info';
 
 interface ConfirmModalProps {
-  visible: boolean
-  title: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  variant?: ConfirmVariant
-  icon?: keyof typeof Ionicons.glyphMap
-  loading?: boolean
-  onConfirm: () => void
-  onCancel: () => void
+  visible: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: ConfirmVariant;
+  icon?: keyof typeof Ionicons.glyphMap;
+  loading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 const variantConfig = {
@@ -50,7 +50,7 @@ const variantConfig = {
     accentColor: '#6366f1',
     defaultIcon: 'information-circle-outline' as keyof typeof Ionicons.glyphMap,
   },
-}
+};
 
 export default function ConfirmModal({
   visible,
@@ -64,12 +64,12 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
-  const fadeAnim = useRef(new Animated.Value(0)).current
-  const scaleAnim = useRef(new Animated.Value(0.85)).current
-  const slideAnim = useRef(new Animated.Value(30)).current
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
-  const config = variantConfig[variant]
-  const displayIcon = icon || config.defaultIcon
+  const config = variantConfig[variant];
+  const displayIcon = icon || config.defaultIcon;
 
   useEffect(() => {
     if (visible) {
@@ -90,25 +90,19 @@ export default function ConfirmModal({
           duration: 250,
           useNativeDriver: true,
         }),
-      ]).start()
+      ]).start();
     } else {
-      fadeAnim.setValue(0)
-      scaleAnim.setValue(0.85)
-      slideAnim.setValue(30)
+      fadeAnim.setValue(0);
+      scaleAnim.setValue(0.85);
+      slideAnim.setValue(30);
     }
-  }, [visible])
+  }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-    >
+    <Modal visible={visible} transparent animationType="none" statusBarTranslucent>
       <Animated.View
         style={{ opacity: fadeAnim }}
-        className="flex-1 bg-black/50 justify-center items-center px-8"
-      >
+        className="flex-1 items-center justify-center bg-black/50 px-8">
         <TouchableOpacity
           activeOpacity={1}
           onPress={loading ? undefined : onCancel}
@@ -117,70 +111,51 @@ export default function ConfirmModal({
 
         <Animated.View
           style={{
-            transform: [
-              { scale: scaleAnim },
-              { translateY: slideAnim },
-            ],
+            transform: [{ scale: scaleAnim }, { translateY: slideAnim }],
           }}
-          className="bg-white rounded-[28px] w-full overflow-hidden"
-        >
+          className="w-full overflow-hidden rounded-[28px] bg-white">
           {/* Content */}
-          <View className="items-center pt-8 pb-6 px-6">
+          <View className="items-center px-6 pb-6 pt-8">
             {/* Icon Circle */}
             <View
-              className={`w-16 h-16 rounded-full ${config.iconBg} items-center justify-center mb-5`}
-            >
-              <Ionicons
-                name={displayIcon}
-                size={28}
-                color={config.iconColor}
-              />
+              className={`h-16 w-16 rounded-full ${config.iconBg} mb-5 items-center justify-center`}>
+              <Ionicons name={displayIcon} size={28} color={config.iconColor} />
             </View>
 
             {/* Title */}
-            <Text className="text-xl font-interBold text-slate-900 text-center mb-2">
-              {title}
-            </Text>
+            <Text className="mb-2 text-center font-interBold text-xl text-slate-900">{title}</Text>
 
             {/* Message */}
-            <Text className="text-slate-500 text-center font-inter leading-5">
-              {message}
-            </Text>
+            <Text className="text-center font-inter leading-5 text-slate-500">{message}</Text>
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-slate-100 mx-6" />
+          <View className="mx-6 h-px bg-slate-100" />
 
           {/* Buttons */}
-          <View className="flex-row p-4 gap-3">
+          <View className="flex-row gap-3 p-4">
             <TouchableOpacity
               onPress={onCancel}
               disabled={loading}
-              className="flex-1 py-4 rounded-2xl bg-slate-100 items-center justify-center"
-              activeOpacity={0.7}
-            >
-              <Text className="font-interBold text-slate-600">
-                {cancelText}
-              </Text>
+              className="flex-1 items-center justify-center rounded-2xl bg-slate-100 py-4"
+              activeOpacity={0.7}>
+              <Text className="font-interBold text-slate-600">{cancelText}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onConfirm}
               disabled={loading}
-              className={`flex-1 py-4 rounded-2xl ${config.confirmBg} items-center justify-center`}
-              activeOpacity={0.7}
-            >
+              className={`flex-1 rounded-2xl py-4 ${config.confirmBg} items-center justify-center`}
+              activeOpacity={0.7}>
               {loading ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="font-interBold text-white">
-                  {confirmText}
-                </Text>
+                <Text className="font-interBold text-white">{confirmText}</Text>
               )}
             </TouchableOpacity>
           </View>
         </Animated.View>
       </Animated.View>
     </Modal>
-  )
+  );
 }

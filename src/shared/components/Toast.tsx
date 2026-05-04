@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from 'react'
-import { Animated, Text, View, Platform } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import React, { useEffect, useRef } from 'react';
+import { Animated, Text, View, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-type ToastType = 'success' | 'error'
+type ToastType = 'success' | 'error';
 
 interface ToastProps {
-  visible: boolean
-  type: ToastType
-  message: string
-  onHide: () => void
-  duration?: number
+  visible: boolean;
+  type: ToastType;
+  message: string;
+  onHide: () => void;
+  duration?: number;
 }
 
 const config = {
@@ -23,18 +23,12 @@ const config = {
     icon: 'alert-circle' as keyof typeof Ionicons.glyphMap,
     iconColor: '#fff',
   },
-}
+};
 
-export default function Toast({
-  visible,
-  type,
-  message,
-  onHide,
-  duration = 3000,
-}: ToastProps) {
-  const translateY = useRef(new Animated.Value(-100)).current
-  const opacity = useRef(new Animated.Value(0)).current
-  const cfg = config[type]
+export default function Toast({ visible, type, message, onHide, duration = 3000 }: ToastProps) {
+  const translateY = useRef(new Animated.Value(-100)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const cfg = config[type];
 
   useEffect(() => {
     if (visible) {
@@ -50,7 +44,7 @@ export default function Toast({
           duration: 250,
           useNativeDriver: true,
         }),
-      ]).start()
+      ]).start();
 
       const timer = setTimeout(() => {
         Animated.parallel([
@@ -64,17 +58,17 @@ export default function Toast({
             duration: 300,
             useNativeDriver: true,
           }),
-        ]).start(() => onHide())
-      }, duration)
+        ]).start(() => onHide());
+      }, duration);
 
-      return () => clearTimeout(timer)
+      return () => clearTimeout(timer);
     } else {
-      translateY.setValue(-100)
-      opacity.setValue(0)
+      translateY.setValue(-100);
+      opacity.setValue(0);
     }
-  }, [visible])
+  }, [visible]);
 
-  if (!visible) return null
+  if (!visible) return null;
 
   return (
     <Animated.View
@@ -86,25 +80,23 @@ export default function Toast({
         zIndex: 9999,
         transform: [{ translateY }],
         opacity,
-      }}
-    >
+      }}>
       <View
-        className={`${cfg.bg} rounded-2xl px-4 py-4 flex-row items-center shadow-lg`}
+        className={`${cfg.bg} flex-row items-center rounded-2xl px-4 py-4 shadow-lg`}
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.15,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 4 },
           elevation: 8,
-        }}
-      >
-        <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center mr-3">
+        }}>
+        <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-white/20">
           <Ionicons name={cfg.icon} size={20} color={cfg.iconColor} />
         </View>
-        <Text className="text-white font-interMedium flex-1 text-sm" numberOfLines={2}>
+        <Text className="flex-1 font-interMedium text-sm text-white" numberOfLines={2}>
           {message}
         </Text>
       </View>
     </Animated.View>
-  )
+  );
 }

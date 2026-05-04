@@ -1,12 +1,6 @@
-
-import { Tabs } from "expo-router";
-import { View } from "react-native";
-import {
-  House,
-  Receipt,
-  Users,
-  Gift,
-} from "lucide-react-native";
+import { Tabs } from 'expo-router';
+import { View } from 'react-native';
+import { House, Receipt, Users, Gift } from 'lucide-react-native';
 
 export default function TabsLayout() {
   return (
@@ -14,28 +8,28 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
 
-        tabBarActiveTintColor: "#4f46e5",
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: '#4f46e5',
+        tabBarInactiveTintColor: '#94a3b8',
 
         tabBarLabelStyle: {
-          fontFamily: "Inter_500Medium",
+          fontFamily: 'Inter_500Medium',
           fontSize: 11,
           marginBottom: 6,
         },
 
         tabBarStyle: {
-          position: "absolute",
+          position: 'absolute',
           left: 16,
           right: 16,
           bottom: 24,
           height: 74,
-          backgroundColor: "#fff",
+          backgroundColor: '#fff',
           borderTopWidth: 0,
           borderRadius: 24,
           paddingTop: 8,
           marginLeft: 20,
           marginRight: 20,
-          shadowColor: "#000",
+          shadowColor: '#000',
           shadowOpacity: 0.08,
           shadowRadius: 12,
           shadowOffset: {
@@ -45,7 +39,7 @@ export default function TabsLayout() {
         },
 
         tabBarIcon: ({ focused, color }) => {
-          const activeColor = "#4f46e5";
+          const activeColor = '#4f46e5';
 
           const iconProps = {
             size: 20,
@@ -55,19 +49,19 @@ export default function TabsLayout() {
 
           let Icon = House;
 
-          if (route.name === "dashboard") {
+          if (route.name === 'dashboard') {
             Icon = House;
           }
 
-          if (route.name === "transaction") {
+          if (route.name === 'transaction') {
             Icon = Receipt;
           }
 
-          if (route.name === "member") {
+          if (route.name === 'member') {
             Icon = Users;
           }
 
-          if (route.name === "promo") {
+          if (route.name === 'promo') {
             Icon = Gift;
           }
 
@@ -78,11 +72,10 @@ export default function TabsLayout() {
                   width: 42,
                   height: 42,
                   borderRadius: 16,
-                  backgroundColor: "#eef2ff",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+                  backgroundColor: '#eef2ff',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                 <Icon {...iconProps} />
               </View>
             );
@@ -90,33 +83,32 @@ export default function TabsLayout() {
 
           return <Icon {...iconProps} />;
         },
-      })}
-    >
+      })}>
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Home",
+          title: 'Home',
         }}
       />
 
       <Tabs.Screen
         name="transaction"
         options={{
-          title: "Transaksi",
+          title: 'Transaksi',
         }}
       />
 
       <Tabs.Screen
         name="member"
         options={{
-          title: "Member",
+          title: 'Member',
         }}
       />
 
       <Tabs.Screen
         name="promo"
         options={{
-          title: "Promo",
+          title: 'Promo',
         }}
       />
     </Tabs>

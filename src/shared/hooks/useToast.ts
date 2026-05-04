@@ -1,14 +1,14 @@
-import { useGlobalToast } from '../context/ToastContext'
+import { useGlobalToast } from '../context/ToastContext';
 
 export function useToast() {
-  const { showToast } = useGlobalToast()
-  
+  const { showToast } = useGlobalToast();
+
   // Kita biarkan return-nya mirip agar tidak merusak kode yang sudah ada,
   // tapi sekarang fungsinya sudah tembus ke Global.
-  return { 
+  return {
     showToast,
     // Dummy state untuk mencegah error di komponen yang masih destructuring toast
-    toast: { visible: false, type: 'success', message: '' },
-    hideToast: () => {} 
-  }
+    toast: { visible: false, type: 'success' as const, message: '' },
+    hideToast: () => {},
+  };
 }

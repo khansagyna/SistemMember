@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import {
   SafeAreaView,
   FlatList,
@@ -9,110 +9,97 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from 'react-native'
+} from 'react-native';
 
-import { useMembers } from '@/features/members/hooks/useMembers'
-import { memberApi } from '@/features/members/api/member.api'
-import MemberCard from '@/features/members/components/MemberCard'
-import MemberCardSkeleton from '@/features/members/components/MemberCardSkeleton'
-import MemberHeader from '@/features/members/components/MemberHeader'
-import ConfirmModal from '@/shared/components/ConfirmModal'
-import { Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
-import Input from '@/shared/components/Input'
-import Button from '@/shared/components/Button'
-import { Member } from '@/features/members/types'
-import Toast from '@/shared/components/Toast'
-import { useToast } from '@/shared/hooks/useToast'
-import AddMemberModal from './components/AddMemberModal'
-import EditMemberModal from './components/EditMemberModal'
+import { useMembers } from '@/features/members/hooks/useMembers';
+import { memberApi } from '@/features/members/api/member.api';
+import MemberCard from '@/features/members/components/MemberCard';
+import MemberCardSkeleton from '@/features/members/components/MemberCardSkeleton';
+import MemberHeader from '@/features/members/components/MemberHeader';
+import ConfirmModal from '@/shared/components/ConfirmModal';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Input from '@/shared/components/Input';
+import Button from '@/shared/components/Button';
+import { Member } from '@/features/members/types';
+import Toast from '@/shared/components/Toast';
+import { useToast } from '@/shared/hooks/useToast';
+import AddMemberModal from './components/AddMemberModal';
+import EditMemberModal from './components/EditMemberModal';
 
 export default function MemberScreen() {
-
-  const { members, loading, reload } = useMembers()
-  const [search, setSearch] = useState('')
-  const { toast, showToast, hideToast } = useToast()
+  const { members, loading, reload } = useMembers();
+  const [search, setSearch] = useState('');
+  const { toast, showToast, hideToast } = useToast();
 
   // Add Member state
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Delete state
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Edit state
-  const [editingMember, setEditingMember] = useState<Member | null>(null)
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
 
   const handleDeletePress = (id: string) => {
-    setDeleteId(id)
-    setShowDeleteModal(true)
-  }
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
 
   const handleDeleteConfirm = async () => {
-    if (!deleteId) return
-    setDeleting(true)
+    if (!deleteId) return;
+    setDeleting(true);
     try {
-      await memberApi.remove(deleteId)
-      reload()
-      showToast('success', 'Member berhasil dihapus')
+      await memberApi.remove(deleteId);
+      reload();
+      showToast('success', 'Member berhasil dihapus');
     } catch (e) {
-      showToast('error', 'Gagal menghapus member')
+      showToast('error', 'Gagal menghapus member');
     }
-    setDeleting(false)
-    setShowDeleteModal(false)
-    setDeleteId(null)
-  }
+    setDeleting(false);
+    setShowDeleteModal(false);
+    setDeleteId(null);
+  };
 
   const handleEditPress = (item: Member) => {
-    setEditingMember(item)
-  }
+    setEditingMember(item);
+  };
 
-  const filtered = members.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
     return (
-      <SafeAreaView className='flex-1 bg-slate-50'>
-        <MemberHeader
-          members={[]}
-          search={search}
-          setSearch={setSearch}
-        />
+      <SafeAreaView className="flex-1 bg-slate-50">
+        <MemberHeader members={[]} search={search} setSearch={setSearch} />
         {[...Array(5)].map((_, i) => (
           <MemberCardSkeleton key={i} />
         ))}
       </SafeAreaView>
-    )
+    );
   }
 
   return (
-    <SafeAreaView className='flex-1 bg-slate-50'>
+    <SafeAreaView className="flex-1 bg-slate-50">
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <MemberHeader
-            members={members}
-            search={search}
-            setSearch={setSearch}
-          />
+          <MemberHeader members={members} search={search} setSearch={setSearch} />
         }
         ListEmptyComponent={
-          <View className="items-center justify-center py-10 px-5">
-            <Text className="text-slate-400 text-base text-center">
-              {search ? 'Tidak ada member yang sesuai dengan pencarian.' : 'Belum ada member yang ditambahkan.'}
+          <View className="items-center justify-center px-5 py-10">
+            <Text className="text-center text-base text-slate-400">
+              {search
+                ? 'Tidak ada member yang sesuai dengan pencarian.'
+                : 'Belum ada member yang ditambahkan.'}
             </Text>
           </View>
         }
         renderItem={({ item }) => (
-          <MemberCard
-            item={item}
-            onDelete={handleDeletePress}
-            onEdit={handleEditPress}
-          />
+          <MemberCard item={item} onDelete={handleDeletePress} onEdit={handleEditPress} />
         )}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
@@ -129,8 +116,8 @@ export default function MemberScreen() {
         loading={deleting}
         onConfirm={handleDeleteConfirm}
         onCancel={() => {
-          setShowDeleteModal(false)
-          setDeleteId(null)
+          setShowDeleteModal(false);
+          setDeleteId(null);
         }}
       />
 
@@ -139,8 +126,8 @@ export default function MemberScreen() {
         visible={!!editingMember}
         member={editingMember}
         onClose={(updated) => {
-          setEditingMember(null)
-          if (updated) reload()
+          setEditingMember(null);
+          if (updated) reload();
         }}
       />
 
@@ -150,9 +137,8 @@ export default function MemberScreen() {
       {/* FAB ADD MEMBER */}
       <TouchableOpacity
         onPress={() => setShowAddModal(true)}
-        className="absolute bottom-[110px] right-6 bg-indigo-600 w-16 h-16 rounded-full items-center justify-center shadow-lg elevation-5"
-        style={{ zIndex: 9999 }}
-      >
+        className="elevation-5 absolute bottom-[110px] right-6 h-16 w-16 items-center justify-center rounded-full bg-indigo-600 shadow-lg"
+        style={{ zIndex: 9999 }}>
         <Ionicons name="add" size={32} color="white" />
       </TouchableOpacity>
 
@@ -160,10 +146,10 @@ export default function MemberScreen() {
       <AddMemberModal
         visible={showAddModal}
         onClose={(added) => {
-          setShowAddModal(false)
-          if (added) reload()
+          setShowAddModal(false);
+          if (added) reload();
         }}
       />
     </SafeAreaView>
-  )
+  );
 }

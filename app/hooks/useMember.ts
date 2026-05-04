@@ -1,34 +1,30 @@
-import { useEffect, useState } from 'react'
-import { getMembers } from '../api/member/promoApi'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react';
+import { getMembers } from '../api/member/promoApi';
+import { supabase } from '@/lib/supabase';
 
 export const useMembers = () => {
-    const [members, setMembers] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+  const [members, setMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    const loadData = async () => {
-        setLoading(true)
-        const data = await getMembers()
-        setMembers(data || [])
-        setLoading(false)
-    }
+  const loadData = async () => {
+    setLoading(true);
+    const data = await getMembers();
+    setMembers(data || []);
+    setLoading(false);
+  };
 
-    useEffect(() => {
-        loadData()
+  useEffect(() => {
+    loadData();
 
-        const channel = supabase
-            .channel('members-realtime')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'members' },
-                loadData
-            )
-            .subscribe()
+    const channel = supabase
+      .channel('members-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, loadData)
+      .subscribe();
 
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [])
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
-    return { members, loading, reload: loadData }
-}
+  return { members, loading, reload: loadData };
+};

@@ -1,5 +1,5 @@
-import PromoScreen from "@/features/promo/PromoScreen";
+import PromoScreen from '@/features/promo/PromoScreen';
 
 export default function Page() {
-  return <PromoScreen />
+  return <PromoScreen />;
 }

@@ -1,5 +1,5 @@
-import { TextInput, View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { TextInput, View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface InputProps {
   placeholder: string;
@@ -8,7 +8,7 @@ interface InputProps {
   secureTextEntry?: boolean;
   label?: string;
   icon?: keyof typeof Ionicons.glyphMap;
-  keyboardType?: "default" | "email-address" | "phone-pad" | "number-pad";
+  keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'number-pad';
   error?: string;
 }
 
@@ -19,25 +19,21 @@ export default function Input({
   secureTextEntry,
   label,
   icon,
-  keyboardType = "default",
+  keyboardType = 'default',
   error,
 }: InputProps) {
   return (
     <View className="mb-5">
-      {label && (
-        <Text className="text-slate-700 mb-2 font-semibold text-base">
-          {label}
-        </Text>
-      )}
+      {label && <Text className="mb-2 text-base font-semibold text-slate-700">{label}</Text>}
       <View
-        className={`flex-row items-center bg-gradient-to-r from-slate-50 to-slate-100 border-2 rounded-2xl px-4 py-3 ${error ? "border-red-400" : "border-slate-200"
-          }`}
-      >
+        className={`flex-row items-center rounded-2xl border-2 bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3 ${
+          error ? 'border-red-400' : 'border-slate-200'
+        }`}>
         {icon && (
           <Ionicons
             name={icon}
             size={20}
-            color={error ? "#f87171" : "#64748b"}
+            color={error ? '#f87171' : '#64748b'}
             style={{ marginRight: 10 }}
           />
         )}
@@ -47,13 +43,11 @@ export default function Input({
           onChangeText={onChangeText}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
-          className="flex-1 text-slate-800 font-medium text-base"
+          className="flex-1 text-base font-medium text-slate-800"
           placeholderTextColor="#94a3b8"
         />
       </View>
-      {error && (
-        <Text className="text-red-500 font-medium text-sm mt-2">{error}</Text>
-      )}
+      {error && <Text className="mt-2 text-sm font-medium text-red-500">{error}</Text>}
     </View>
   );
 }

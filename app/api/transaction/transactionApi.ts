@@ -1,27 +1,18 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from '@/lib/supabase';
 
 export const transactionApi = {
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    getAll: async () => {
+    if (error) throw error;
 
-        const { data, error } = await supabase
-            .from("transactions")
-            .select("*")
-            .order("created_at", { ascending: false });
+    return data || [];
+  },
 
-        if (error) throw error;
-
-        return data || [];
-
-    },
-
-    delete: async (id: string) => {
-
-        return await supabase
-            .from("transactions")
-            .delete()
-            .eq("id", id);
-
-    }
-
-}
+  delete: async (id: string) => {
+    return await supabase.from('transactions').delete().eq('id', id);
+  },
+};
